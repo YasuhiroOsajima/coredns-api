@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  coredns-container:
+    image: coredns/coredns:1.8.0
+    container_name: coredns-container
+    hostname: coredns-container
+    ports:
+      - "53:53/udp"
+    volumes:
+      - /root/coder-automate/myfiles/codes/coredns-api/coredns_conf/:/opt
+    command: -conf /opt/coredns.conf
