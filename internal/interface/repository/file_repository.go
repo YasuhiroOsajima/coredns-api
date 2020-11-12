@@ -1,0 +1,5 @@
+package repository
+
+func NewInstanceRepository() {
+
+}
