@@ -1,6 +1,8 @@
 .vscode
 .DS_Store
 .idea
+.go-version
 
 go.sum
 go.sum*tmp
+

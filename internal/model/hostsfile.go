@@ -1,15 +1,14 @@
-package repository
+package model
 
 import (
-	model "coredns_api/internal/domain"
 	"coredns_api/internal/infrastructure"
 	"errors"
 	"strings"
 )
 
 type HostsFile struct {
-	domain *model.Domain
-	hosts  []*model.Host
+	domain *Domain
+	hosts  []*Host
 }
 
 func NewHostsFile(domainName string) (*HostsFile, error) {
@@ -18,8 +17,8 @@ func NewHostsFile(domainName string) (*HostsFile, error) {
 		return nil, err
 	}
 
-	var domain *model.Domain
-	var hosts []*model.Host
+	var domain *Domain
+	var hosts []*Host
 	for _, line := range strings.Split(domainInfo, "\n") {
 		// Expected hosts info is like this:
 		//
@@ -36,7 +35,7 @@ func NewHostsFile(domainName string) (*HostsFile, error) {
 		if strings.Contains(commentInfo, "DomainUUID:") {
 			splitedComment := strings.Split(commentInfo, " ")
 			domainID := splitedComment[len(splitedComment)-1]
-			domain, err = model.NewDomain(domainID, domainName)
+			domain, err = NewDomain(domainID, domainName)
 			if err != nil {
 				return nil, err
 			}
@@ -48,7 +47,7 @@ func NewHostsFile(domainName string) (*HostsFile, error) {
 		address := splitedHostInfo[0]
 		hostname := splitedHostInfo[len(splitedHostInfo)-1]
 
-		host, err := model.NewHost(uuid, hostname, address)
+		host, err := NewHost(uuid, hostname, address)
 		if err != nil {
 			return nil, err
 		}
