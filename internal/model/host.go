@@ -1,15 +1,17 @@
 package model
 
 import (
+	"bytes"
 	"errors"
 	"regexp"
 	"strings"
+	"text/template"
 )
 
 type Host struct {
-	Uuid    string `json:"uuid"`
-	Name    string `json:"name"`
-	Address string `json:"address"`
+	Uuid    string
+	Name    string
+	Address string
 }
 
 func NewHost(uuid, name, address string) (*Host, error) {
@@ -29,4 +31,18 @@ func NewHost(uuid, name, address string) (*Host, error) {
 	}
 
 	return &Host{uuid, name, address}, nil
+}
+
+func (h *Host) GetHostInfo() (string, error) {
+	hostInfo := `{{ .Address }}  {{ .Name }}  # {{ .Uuid }}`
+	tmpl := template.Must(template.New("").Parse(hostInfo))
+
+	var out bytes.Buffer
+	err := tmpl.Execute(&out, h)
+	if err != nil {
+		return "", err
+	}
+	result := out.String()
+
+	return result, nil
 }

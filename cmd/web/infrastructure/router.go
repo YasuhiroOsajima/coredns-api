@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+
 	// _ "coredns_api/docs"
 )
 
@@ -21,8 +22,10 @@ func Router() {
 	var Router *gin.Engine
 	Router = gin.Default()
 
-	Router.GET("/domains", dcntr.Add)
-	Router.GET("/hosts", hcntr.HostsHndler)
+	Router.POST("/domains", func(c *gin.Context) { dcntr.Add(c) })
+	Router.GET("/domains/:uuid", func(c *gin.Context) { dcntr.Get(c) })
+
+	Router.GET("/hosts", func(c *gin.Context) { hcntr.Add(c) })
 
 	url := ginSwagger.URL("http://" + Server + ":" + Port + "/swagger/doc.json")
 	Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))

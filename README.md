@@ -34,27 +34,6 @@ HTTP/1.1 204 No Content
 Content-Length: 0
 ```
 
-## Get domain
-
-request
-
-```bash
-curl -X GET http://127.0.0.1/v1/domains/{DOMAIN_UUID}
-```
-
-response
-
-```text
-HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-    "domains": [
-        {"domain": "hogehoge.hoge", "uuid": "aea6cf49-2912-42af-b903-dae1312f64d9"}
-    ]
-}
-```
-
 ## List domains
 
 request
@@ -76,6 +55,34 @@ Content-Type: application/json
     ]
 }
 ```
+
+## Get domain
+
+request
+
+```bash
+curl -X GET http://127.0.0.1/v1/domains/{DOMAIN_UUID}
+```
+
+response
+
+```text
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "domain": "hogehoge.hoge",
+    "uuid": "aea6cf49-2912-42af-b903-dae1312f64d9",
+    "hosts": [
+        {
+            "hostname": "hogeserver2",
+            "address": "172.21.1.2",
+            "uuid": "a51d334d-567c-4566-b1ff-186446403d3a"
+        }
+    ]
+}
+```
+
 
 ## Add host
 
@@ -176,6 +183,7 @@ Content-Type: application/json
 
 {
     "domain": "hogehoge.hoge",
+    "uuid": "aea6cf49-2912-42af-b903-dae1312f64d9",
     "hosts": [
         {
             "hostname": "hogeserver2",

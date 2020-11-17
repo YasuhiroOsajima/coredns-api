@@ -5,10 +5,10 @@ import (
 )
 
 type HostController struct {
-	Interactor usecase.HostInteractor
+	Interactor *usecase.HostInteractor
 }
 
-func NewHostController(itr usecase.HostInteractor) *HostController {
+func NewHostController(itr *usecase.HostInteractor) *HostController {
 	return &HostController{itr}
 }
 
@@ -19,6 +19,12 @@ func NewHostController(itr usecase.HostInteractor) *HostController {
 // @Produce  json
 // @Success 200
 // @Router /images [get]
+
+func (d *HostController) Add(c Context) {
+	result := AddResult{Domain: "", Uuid: ""}
+	c.JSON(200, result)
+}
+
 // func HostsHndler(c Context) {
 // 	db := repository.NewImageRepository()
 // 	imagelist, err := db.FindAll()
