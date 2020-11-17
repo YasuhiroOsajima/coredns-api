@@ -167,7 +167,7 @@ HTTP/1.1 204 No Content
 Content-Length: 0
 ```
 
-## List hosts
+## Get host
 
 request
 

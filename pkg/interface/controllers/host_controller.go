@@ -19,27 +19,22 @@ func NewHostController(itr *usecase.HostInteractor) *HostController {
 // @Produce  json
 // @Success 200
 // @Router /images [get]
-
 func (d *HostController) Add(c Context) {
 	result := AddResult{Domain: "", Uuid: ""}
 	c.JSON(200, result)
 }
 
-// func HostsHndler(c Context) {
-// 	db := repository.NewImageRepository()
-// 	imagelist, err := db.FindAll()
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-//
-// 	var images []Image
-// 	for _, i := range imagelist {
-// 		var img Image
-// 		img.Uuid = i.Uuid
-// 		img.Name = i.Name
-// 		img.Owner = i.Owner
-// 		images = append(images, img)
-// 	}
-//
-// 	c.JSON(200, images)
-// }
+func (d *HostController) Update(c Context) {
+	result := AddResult{Domain: "", Uuid: ""}
+	c.JSON(200, result)
+}
+
+func (d *HostController) Get(c Context) {
+	result := AddResult{Domain: "", Uuid: ""}
+	c.JSON(200, result)
+}
+
+func (d *HostController) Delete(c Context) {
+	result := AddResult{Domain: "", Uuid: ""}
+	c.JSON(200, result)
+}

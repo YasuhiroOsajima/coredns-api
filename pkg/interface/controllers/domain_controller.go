@@ -23,9 +23,7 @@ type HostResult struct {
 }
 
 type DomainRequest struct {
-	FieldStr  string `json:"field_str"`
-	FieldInt  int    `json:"field_int"`
-	FieldBool bool   `json:"field_bool"`
+	Name string `json:"domain"`
 }
 
 type DomainController struct {
@@ -34,6 +32,48 @@ type DomainController struct {
 
 func NewDomainController(itr *usecase.DomainInteractor) *DomainController {
 	return &DomainController{itr}
+}
+
+func (d *DomainController) Add(c Context) {
+	u, err := uuid.NewRandom()
+	if err != nil {
+		log.Fatal(err)
+		mes := errors.New("unhandled server side error")
+		c.JSON(500, NewError(mes))
+		return
+	}
+
+	var request DomainRequest
+	err = c.ShouldBindJSON(&request)
+	if err != nil {
+		log.Fatal(err)
+		mes := errors.New("unhandled server side error")
+		c.JSON(500, NewError(mes))
+		return
+	}
+
+	name := request.Name
+	dmn, err := model.NewDomain(u.String(), name)
+	if err != nil {
+		log.Fatal(err)
+		c.JSON(400, NewError(err))
+		return
+	}
+
+	err = d.interactor.Add(dmn)
+	if err != nil {
+		log.Fatal(err)
+		mes := errors.New("Unhandled server side error")
+		c.JSON(500, NewError(mes))
+		return
+	}
+
+	result := AddResult{Domain: "", Uuid: ""}
+	c.JSON(200, result)
+}
+
+func (d *DomainController) List(c Context) {
+
 }
 
 // InstanceHandler is to get instances info
@@ -45,9 +85,6 @@ func NewDomainController(itr *usecase.DomainInteractor) *DomainController {
 // @Router /instances [get]
 func (d *DomainController) Get(c Context) {
 	domainUuid := c.Param("uuid")
-	c.ShouldBindJSON()
-
-
 	name := c.Param("domain")
 	domain, err := model.NewDefaultDomain(domainUuid, name)
 	if err != nil {
@@ -73,31 +110,22 @@ func (d *DomainController) Get(c Context) {
 	c.JSON(200, result)
 }
 
-func (d *DomainController) Add(c Context) {
-	u, err := uuid.NewRandom()
-	if err != nil {
-		log.Fatal(err)
-		mes := errors.New("unhandled server side error")
-		c.JSON(500, NewError(mes))
-		return
-	}
-
+func (d *DomainController) Delete(c Context) {
+	domainUuid := c.Param("uuid")
 	name := c.Param("domain")
-	dmn, err := model.NewDomain(u.String(), name)
+	domain, err := model.NewDefaultDomain(domainUuid, name)
 	if err != nil {
 		log.Fatal(err)
 		c.JSON(400, NewError(err))
 		return
 	}
 
-	err = d.interactor.Add(dmn)
+	err = d.interactor.Delete(domain)
 	if err != nil {
 		log.Fatal(err)
-		mes := errors.New("Unhandled server side error")
-		c.JSON(500, NewError(mes))
+		c.JSON(500, NewError(err))
 		return
 	}
 
-	result := AddResult{Domain: "", Uuid: ""}
-	c.JSON(200, result)
+	c.Status(204)
 }

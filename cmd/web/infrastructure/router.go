@@ -23,9 +23,14 @@ func Router() {
 	Router = gin.Default()
 
 	Router.POST("/domains", func(c *gin.Context) { dcntr.Add(c) })
+	Router.GET("/domains", func(c *gin.Context) { dcntr.List(c) })
 	Router.GET("/domains/:uuid", func(c *gin.Context) { dcntr.Get(c) })
+	Router.DELETE("/domains/:uuid", func(c *gin.Context) { dcntr.Delete(c) })
 
-	Router.GET("/hosts", func(c *gin.Context) { hcntr.Add(c) })
+	Router.POST("/domains/:domain_uuid/hosts", func(c *gin.Context) { hcntr.Add(c) })
+	Router.PATCH("/domains/:domain_uuid/hosts/:uuid", func(c *gin.Context) { hcntr.Update(c) })
+	Router.GET("/domains/:domain_uuid/hosts/:uuid", func(c *gin.Context) { hcntr.Get(c) })
+	Router.DELETE("/domains/:domain_uuid/hosts/:uuid", func(c *gin.Context) { hcntr.Delete(c) })
 
 	url := ginSwagger.URL("http://" + Server + ":" + Port + "/swagger/doc.json")
 	Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
