@@ -14,31 +14,52 @@ func NewFileRepository(fs IFilesystem) usecase.IFilesystemRepository {
 }
 
 func (f *FilesystemRepository) WriteDomainFile(domain *model.Domain) error {
+	domainCache.Lock()
+	defer domainCache.Unlock()
+
 	name := domain.Name
 	fileInfo, err := domain.GetFileInfo()
 	if err != nil {
 		return err
 	}
 
-	err = f.filesystem.WriteTextFile(name, fileInfo)
+	err = f.filesystem.WriteTextFile(name.String(), fileInfo)
+
+	domainCache.Add(domain)
+
 	return err
 }
 
 func (f *FilesystemRepository) LoadDomainFile(targetDomain *model.Domain) (*model.Domain, error) {
+	domainCache.Lock()
+	defer domainCache.Unlock()
+
 	domainName := targetDomain.Name
-	fileInfo, err := f.filesystem.LoadTextFile(domainName)
+	domain, err := domainCache.Get(domainName)
+	if err == nil {
+		return domain, nil
+	}
+
+	fileInfo, err := f.filesystem.LoadTextFile(domainName.String())
 	if err != nil {
 		return nil, err
 	}
 
-	domain, err := model.NewDomain(domainName, fileInfo)
+	domain, err = model.NewDomain(domainName.String(), fileInfo)
 	if err != nil {
 		return nil, err
 	}
+
+	domainCache.Add(domain)
 
 	return domain, nil
 }
 
 func (f *FilesystemRepository) DeleteDomainFile(domain *model.Domain) error {
-	return f.filesystem.DeleteFile(domain.Name)
+	domainCache.Lock()
+	defer domainCache.Unlock()
+
+	domainCache.Delete(domain)
+
+	return f.filesystem.DeleteFile(domain.Name.String())
 }

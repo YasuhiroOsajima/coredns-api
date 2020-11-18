@@ -1,14 +1,16 @@
 package infrastructure
 
 import (
-	"os"
-
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+	"os"
 
 	_ "coredns_api/docs"
 )
+
+// Todo. メモリ上にドメイン情報を置いておく
+// Todo. Goルーチンで定期的に書き出し
 
 // @title gin-swagger sample
 // @version 0.1

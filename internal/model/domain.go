@@ -4,14 +4,13 @@ import (
 	"bytes"
 	"errors"
 	"github.com/google/uuid"
-	"regexp"
 	"strings"
 	"text/template"
 )
 
 type Domain struct {
 	Uuid  Uuid
-	Name  string
+	Name  DomainName
 	Hosts []*Host
 }
 
@@ -26,14 +25,14 @@ func NewOriginalDomain(name string) (*Domain, error) {
 }
 
 func NewEmptyDomain(uuid Uuid, name string) (*Domain, error) {
-	nameMatcher := regexp.MustCompile("^[0-9a-zA-Z_-]+$").MatchString
-	if len(name) == 0 || !nameMatcher(name) {
-		return nil, errors.New("invalid Domain name is specified")
+	domainName, err := NewDomainName(name)
+	if err != nil {
+		return nil, err
 	}
 
 	var hosts []*Host
 
-	return &Domain{uuid, name, hosts}, nil
+	return &Domain{uuid, domainName, hosts}, nil
 }
 
 func NewDomain(name, fileInfo string) (*Domain, error) {
