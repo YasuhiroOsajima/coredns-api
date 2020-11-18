@@ -7,7 +7,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 
-	// _ "coredns_api/docs"
+	_ "coredns_api/docs"
 )
 
 // @title gin-swagger sample
