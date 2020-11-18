@@ -66,7 +66,7 @@ func (d *HostController) Add(c Context) {
 	hosts = append(hosts, hostRes)
 
 	var result AddResult
-	result.Domain = gotDomain.Name
+	result.Domain = gotDomain.Name.String()
 	result.Uuid = gotDomain.Uuid.String()
 	result.Hosts = hosts
 	c.JSON(200, result)
@@ -139,7 +139,7 @@ func (d *HostController) Update(c Context) {
 	hosts = append(hosts, hostRes)
 
 	var result AddResult
-	result.Domain = domain.Name
+	result.Domain = domain.Name.String()
 	result.Uuid = domain.Uuid.String()
 	result.Hosts = hosts
 	c.JSON(200, result)
@@ -180,7 +180,7 @@ func (d *HostController) Get(c Context) {
 	hosts = append(hosts, hostRes)
 
 	var result AddResult
-	result.Domain = domain.Name
+	result.Domain = domain.Name.String()
 	result.Uuid = domain.Uuid.String()
 	result.Hosts = hosts
 	c.JSON(200, result)

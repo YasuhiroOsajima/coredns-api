@@ -67,7 +67,7 @@ func (d *DomainController) Add(c Context) {
 	}
 
 	var result AddResult
-	result.Domain = dom.Name
+	result.Domain = dom.Name.String()
 	result.Uuid = dom.Uuid.String()
 	c.JSON(200, result)
 }
@@ -83,7 +83,7 @@ func (d *DomainController) List(c Context) {
 
 	var domList []DomainResult
 	for _, dom := range domainList {
-		domRes := DomainResult{Domain: dom.Name, Uuid: dom.Uuid.String()}
+		domRes := DomainResult{Domain: dom.Name.String(), Uuid: dom.Uuid.String()}
 		domList = append(domList, domRes)
 	}
 
@@ -121,7 +121,7 @@ func (d *DomainController) Get(c Context) {
 	}
 
 	var result AddResult
-	result.Domain = gotDomain.Name
+	result.Domain = gotDomain.Name.String()
 	result.Uuid = gotDomain.Uuid.String()
 	result.Hosts = hosts
 	c.JSON(200, result)
