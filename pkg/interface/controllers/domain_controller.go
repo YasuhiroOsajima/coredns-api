@@ -4,22 +4,28 @@ import (
 	"errors"
 	"log"
 
-	"github.com/google/uuid"
-
 	"coredns_api/internal/model"
 	"coredns_api/internal/usecase"
 )
 
 type AddResult struct {
-	Domain string       `json:"domain"`
-	Uuid   string       `json:"uuid"`
-	Hosts  []HostResult `json:"hosts"`
+	DomainResult
+	Hosts []HostResult `json:"hosts"`
+}
+
+type DomainResult struct {
+	Domain string `json:"domain"`
+	Uuid   string `json:"uuid"`
 }
 
 type HostResult struct {
 	Name    string `json:"hostname"`
 	Address string `json:"address"`
 	Uuid    string `json:"uuid"`
+}
+
+type DomainListResult struct {
+	Domains []DomainResult `json:"domains"`
 }
 
 type DomainRequest struct {
@@ -35,16 +41,8 @@ func NewDomainController(itr *usecase.DomainInteractor) *DomainController {
 }
 
 func (d *DomainController) Add(c Context) {
-	u, err := uuid.NewRandom()
-	if err != nil {
-		log.Fatal(err)
-		mes := errors.New("unhandled server side error")
-		c.JSON(500, NewError(mes))
-		return
-	}
-
 	var request DomainRequest
-	err = c.ShouldBindJSON(&request)
+	err := c.ShouldBindJSON(&request)
 	if err != nil {
 		log.Fatal(err)
 		mes := errors.New("unhandled server side error")
@@ -53,27 +51,44 @@ func (d *DomainController) Add(c Context) {
 	}
 
 	name := request.Name
-	dmn, err := model.NewDomain(u.String(), name)
+	dom, err := model.NewOriginalDomain(name)
 	if err != nil {
 		log.Fatal(err)
 		c.JSON(400, NewError(err))
 		return
 	}
 
-	err = d.interactor.Add(dmn)
+	err = d.interactor.Add(dom)
 	if err != nil {
 		log.Fatal(err)
-		mes := errors.New("Unhandled server side error")
+		mes := errors.New("unhandled server side error")
 		c.JSON(500, NewError(mes))
 		return
 	}
 
-	result := AddResult{Domain: "", Uuid: ""}
+	var result AddResult
+	result.Domain = dom.Name
+	result.Uuid = dom.Uuid.String()
 	c.JSON(200, result)
 }
 
 func (d *DomainController) List(c Context) {
+	domainList, err := d.interactor.DbRepository.GetDomainsList()
+	if err != nil {
+		log.Fatal(err)
+		mes := errors.New("unhandled server side error")
+		c.JSON(500, NewError(mes))
+		return
+	}
 
+	var domList []DomainResult
+	for _, dom := range domainList {
+		domRes := DomainResult{Domain: dom.Name, Uuid: dom.Uuid.String()}
+		domList = append(domList, domRes)
+	}
+
+	result := DomainListResult{Domains: domList}
+	c.JSON(200, result)
 }
 
 // InstanceHandler is to get instances info
@@ -85,15 +100,14 @@ func (d *DomainController) List(c Context) {
 // @Router /instances [get]
 func (d *DomainController) Get(c Context) {
 	domainUuid := c.Param("uuid")
-	name := c.Param("domain")
-	domain, err := model.NewDefaultDomain(domainUuid, name)
+	dUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
 		log.Fatal(err)
 		c.JSON(400, NewError(err))
 		return
 	}
 
-	gotDomain, err := d.interactor.Get(domain)
+	gotDomain, err := d.interactor.Get(dUuid)
 	if err != nil {
 		log.Fatal(err)
 		c.JSON(500, NewError(err))
@@ -102,25 +116,27 @@ func (d *DomainController) Get(c Context) {
 
 	var hosts []HostResult
 	for _, h := range gotDomain.Hosts {
-		host := HostResult{Name: h.Name, Address: h.Address, Uuid: h.Uuid}
+		host := HostResult{Name: h.Name, Address: h.Address, Uuid: h.Uuid.String()}
 		hosts = append(hosts, host)
 	}
 
-	result := AddResult{Domain: gotDomain.Name, Uuid: gotDomain.Uuid, Hosts: hosts}
+	var result AddResult
+	result.Domain = gotDomain.Name
+	result.Uuid = gotDomain.Uuid.String()
+	result.Hosts = hosts
 	c.JSON(200, result)
 }
 
 func (d *DomainController) Delete(c Context) {
 	domainUuid := c.Param("uuid")
-	name := c.Param("domain")
-	domain, err := model.NewDefaultDomain(domainUuid, name)
+	dUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
 		log.Fatal(err)
 		c.JSON(400, NewError(err))
 		return
 	}
 
-	err = d.interactor.Delete(domain)
+	err = d.interactor.Delete(dUuid)
 	if err != nil {
 		log.Fatal(err)
 		c.JSON(500, NewError(err))

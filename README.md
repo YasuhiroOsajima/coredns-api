@@ -1,6 +1,15 @@
 # REST API for standalone coredns
 
-## Add domain
+## Install
+
+```bash
+yum install sqlite
+mkdir /var/lib/coredns-api
+```
+
+## Usage
+
+### Add domain
 
 request
 
@@ -19,7 +28,7 @@ Content-Type: application/json
 {"domain": "hogehoge.hoge", "uuid": "aea6cf49-2912-42af-b903-dae1312f64d9"}
 ```
 
-## Delete domain
+### Delete domain
 
 request
 
@@ -34,7 +43,7 @@ HTTP/1.1 204 No Content
 Content-Length: 0
 ```
 
-## List domains
+### List domains
 
 request
 
@@ -56,7 +65,7 @@ Content-Type: application/json
 }
 ```
 
-## Get domain
+### Get domain
 
 request
 
@@ -84,7 +93,7 @@ Content-Type: application/json
 ```
 
 
-## Add host
+### Add host
 
 request
 
@@ -110,7 +119,7 @@ Content-Type: application/json
 }
 ```
 
-## Update host
+### Update host
 
 request
 
@@ -152,7 +161,7 @@ Content-Type: application/json
 }
 ```
 
-## Delete host
+### Delete host
 
 request
 
@@ -167,7 +176,7 @@ HTTP/1.1 204 No Content
 Content-Length: 0
 ```
 
-## Get host
+### Get host
 
 request
 

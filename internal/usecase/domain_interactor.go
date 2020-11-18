@@ -6,10 +6,11 @@ import (
 
 type DomainInteractor struct {
 	FsRepository IFilesystemRepository
+	DbRepository IDatabaseRepository
 }
 
-func NewDomainInteractor(repo IFilesystemRepository) *DomainInteractor {
-	return &DomainInteractor{repo}
+func NewDomainInteractor(fRepo IFilesystemRepository, dRepo IDatabaseRepository) *DomainInteractor {
+	return &DomainInteractor{FsRepository: fRepo, DbRepository: dRepo}
 }
 
 func (i *DomainInteractor) Add(domain *model.Domain) error {
@@ -18,21 +19,40 @@ func (i *DomainInteractor) Add(domain *model.Domain) error {
 		return err
 	}
 
+	err = i.DbRepository.AddDomain(domain)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (i *DomainInteractor) Get(domain *model.Domain) (*model.Domain, error) {
-	domainName := domain.Name
-	gotDomain, err := i.FsRepository.LoadDomainFile(domainName)
+func (i *DomainInteractor) Get(domainUuid model.Uuid) (*model.Domain, error) {
+	targetDomain, err := i.DbRepository.GetDomain(domainUuid)
 	if err != nil {
 		return nil, err
 	}
 
-	return gotDomain, nil
+	gotDomainInfo, err := i.FsRepository.LoadDomainFile(targetDomain)
+	if err != nil {
+		return nil, err
+	}
+
+	return gotDomainInfo, nil
 }
 
-func (i *DomainInteractor) Delete(domain *model.Domain) error {
-	err := i.FsRepository.DeleteDomainFile(domain)
+func (i *DomainInteractor) Delete(domainUuid model.Uuid) error {
+	domain, err := i.DbRepository.GetDomain(domainUuid)
+	if err != nil {
+		return err
+	}
+
+	err = i.FsRepository.DeleteDomainFile(domain)
+	if err != nil {
+		return err
+	}
+
+	err = i.DbRepository.DeleteDomain(domain)
 	if err != nil {
 		return err
 	}

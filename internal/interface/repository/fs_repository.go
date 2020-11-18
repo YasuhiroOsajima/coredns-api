@@ -24,7 +24,8 @@ func (f *FilesystemRepository) WriteDomainFile(domain *model.Domain) error {
 	return err
 }
 
-func (f *FilesystemRepository) LoadDomainFile(domainName string) (*model.Domain, error) {
+func (f *FilesystemRepository) LoadDomainFile(targetDomain *model.Domain) (*model.Domain, error) {
+	domainName := targetDomain.Name
 	fileInfo, err := f.filesystem.LoadTextFile(domainName)
 	if err != nil {
 		return nil, err

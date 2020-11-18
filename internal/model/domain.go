@@ -3,23 +3,29 @@ package model
 import (
 	"bytes"
 	"errors"
+	"github.com/google/uuid"
 	"regexp"
 	"strings"
 	"text/template"
 )
 
 type Domain struct {
-	Uuid  string
+	Uuid  Uuid
 	Name  string
 	Hosts []*Host
 }
 
-func NewDefaultDomain(uuid, name string) (*Domain, error) {
-
-	if len(uuid) == 0 || len(uuid) >= 37 {
-		return nil, errors.New("invalid Domain UUID is specified")
+func NewOriginalDomain(name string) (*Domain, error) {
+	u, _ := uuid.NewRandom()
+	domainUuid, err := NewUuid(u.String())
+	if err != nil {
+		return nil, err
 	}
 
+	return NewEmptyDomain(domainUuid, name)
+}
+
+func NewEmptyDomain(uuid Uuid, name string) (*Domain, error) {
 	nameMatcher := regexp.MustCompile("^[0-9a-zA-Z_-]+$").MatchString
 	if len(name) == 0 || !nameMatcher(name) {
 		return nil, errors.New("invalid Domain name is specified")
@@ -52,7 +58,8 @@ func NewDomain(name, fileInfo string) (*Domain, error) {
 
 		if strings.Contains(commentInfo, "DomainUUID:") {
 			domainID := splitComment[len(splitComment)-1]
-			domain, err = NewDefaultDomain(domainID, name)
+			dID := Uuid(domainID)
+			domain, err = NewEmptyDomain(dID, name)
 			if err != nil {
 				return nil, err
 			}
@@ -62,7 +69,12 @@ func NewDomain(name, fileInfo string) (*Domain, error) {
 			address := splitHost[0]
 			hostName := splitHost[1]
 
-			host, err := NewHost(hostName, address, hostId)
+			hUuid, err := NewUuid(hostId)
+			if err != nil {
+				return nil, err
+			}
+
+			host, err := NewHost(hUuid, hostName, address)
 			if err != nil {
 				return nil, err
 			}
