@@ -4,14 +4,18 @@ import (
 	"bytes"
 	"errors"
 	"github.com/google/uuid"
+	"path/filepath"
 	"strings"
 	"text/template"
 )
 
 type Domain struct {
-	Uuid  Uuid
-	Name  DomainName
-	Hosts []*Host
+	Uuid           Uuid
+	Name           DomainName
+	Hosts          []*Host
+	DomainFilePath string
+	ReloadInterval string
+	ReloadJitter   string
 }
 
 func NewOriginalDomain(name string) (*Domain, error) {
@@ -31,8 +35,17 @@ func NewEmptyDomain(uuid Uuid, name string) (*Domain, error) {
 	}
 
 	var hosts []*Host
+	hostsPath := filepath.Join(GetHostsDir(), name)
 
-	return &Domain{uuid, domainName, hosts}, nil
+	domain := &Domain{
+		Uuid:           uuid,
+		Name:           domainName,
+		Hosts:          hosts,
+		DomainFilePath: hostsPath,
+		ReloadInterval: "10s",
+		ReloadJitter:   "5s"}
+
+	return domain, nil
 }
 
 func NewDomain(name, fileInfo string) (*Domain, error) {
@@ -63,7 +76,7 @@ func NewDomain(name, fileInfo string) (*Domain, error) {
 				return nil, err
 			}
 		} else {
-			hostId := splitComment[1]
+			hostId := splitComment[0]
 			splitHost := strings.Fields(hostInfo)
 			address := splitHost[0]
 			hostName := splitHost[1]
@@ -91,7 +104,8 @@ func NewDomain(name, fileInfo string) (*Domain, error) {
 }
 
 func (d *Domain) GetFileInfo() (string, error) {
-	fileInfo := `# DomainUUID: {{ .Uuid }}`
+	fileInfo := `# DomainUUID: {{ .Uuid }}
+`
 	tmpl := template.Must(template.New("").Parse(fileInfo))
 
 	var out bytes.Buffer
@@ -106,7 +120,7 @@ func (d *Domain) GetFileInfo() (string, error) {
 		if err != nil {
 			return "", err
 		}
-		result = result + "¥n" + i
+		result = result + i
 	}
 
 	return result, nil

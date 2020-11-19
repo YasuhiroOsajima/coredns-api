@@ -8,5 +8,21 @@ services:
     ports:
       - "53:53/udp"
     volumes:
-      - /root/coder-automate/myfiles/codes/coredns-api/coredns_conf/:/opt
-    command: -conf /opt/coredns.conf
+      - ./coredns_conf/:/var/lib/coredns:ro
+    command: -conf /var/lib/coredns/coredns.conf
+
+  coredns-api:
+    image: coredns-api:0.1
+    container_name: coredns-api
+    hostname: coredns-api
+    ports:
+      - "8080:8080/tcp"
+    volumes:
+      - ./coredns_conf/:/var/lib/coredns:ro
+      - ./work/:/var/lib/coredns-api
+    environment:
+      - SERVER=172.28.21.40
+      - PORT=8080
+      - CONF_PATH=/var/lib/coredns/coredns.conf
+      - HOSTS_DIR=/var/lib/coredns/hosts/
+      - DB_PATH=/var/lib/coredns-api/coredns-api.db

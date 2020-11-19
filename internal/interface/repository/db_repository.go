@@ -25,8 +25,13 @@ func (d *DatabaseRepository) GetDomain(uuid model.Uuid) (*model.Domain, error) {
 		return nil, err
 	}
 
+	domainName, err := model.NewDomainName(domainResult.Name)
+	if err != nil {
+		return nil, err
+	}
+
 	domain.Uuid = domainUuid
-	domain.Name = domainResult.Name
+	domain.Name = domainName
 	return &domain, nil
 }
 
@@ -47,7 +52,8 @@ func (d *DatabaseRepository) GetDomainsList() ([]*model.Domain, error) {
 
 func (d *DatabaseRepository) AddDomain(domain *model.Domain) error {
 	uuid := domain.Uuid
-	return d.db.InsertDomain(uuid.String(), domain.Name)
+	name := domain.Name
+	return d.db.InsertDomain(uuid.String(), name.String())
 }
 
 func (d *DatabaseRepository) DeleteDomain(domain *model.Domain) error {

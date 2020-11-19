@@ -33,7 +33,7 @@ func (i *DomainInteractor) Get(domainUuid model.Uuid) (*model.Domain, error) {
 		return nil, err
 	}
 
-	gotDomainInfo, err := i.FsRepository.LoadDomainFile(targetDomain)
+	gotDomainInfo, err := i.FsRepository.LoadDomainFile(targetDomain.Name)
 	if err != nil {
 		return nil, err
 	}

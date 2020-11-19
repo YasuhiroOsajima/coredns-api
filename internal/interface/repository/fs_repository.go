@@ -1,21 +1,34 @@
 package repository
 
 import (
+	"log"
+
 	"coredns_api/internal/model"
 	"coredns_api/internal/usecase"
 )
+
+var coreDNSConfCache *model.CoreDNSConf
 
 type FilesystemRepository struct {
 	filesystem IFilesystem
 }
 
 func NewFileRepository(fs IFilesystem) usecase.IFilesystemRepository {
-	return &FilesystemRepository{fs}
+
+	f := &FilesystemRepository{fs}
+
+	allDomainInfo, err := f.loadAllDomainFiles()
+	if err != nil {
+		panic(err)
+	}
+
+	coreDNSConfCache = model.NewCoreDNSConf(allDomainInfo)
+	return f
 }
 
 func (f *FilesystemRepository) WriteDomainFile(domain *model.Domain) error {
-	domainCache.Lock()
-	defer domainCache.Unlock()
+	coreDNSConfCache.Lock()
+	defer coreDNSConfCache.Unlock()
 
 	name := domain.Name
 	fileInfo, err := domain.GetFileInfo()
@@ -25,17 +38,16 @@ func (f *FilesystemRepository) WriteDomainFile(domain *model.Domain) error {
 
 	err = f.filesystem.WriteTextFile(name.String(), fileInfo)
 
-	domainCache.Add(domain)
+	coreDNSConfCache.Add(domain)
 
 	return err
 }
 
-func (f *FilesystemRepository) LoadDomainFile(targetDomain *model.Domain) (*model.Domain, error) {
-	domainCache.Lock()
-	defer domainCache.Unlock()
+func (f *FilesystemRepository) LoadDomainFile(domainName model.DomainName) (*model.Domain, error) {
+	coreDNSConfCache.Lock()
+	defer coreDNSConfCache.Unlock()
 
-	domainName := targetDomain.Name
-	domain, err := domainCache.Get(domainName)
+	domain, err := coreDNSConfCache.Get(domainName)
 	if err == nil {
 		return domain, nil
 	}
@@ -50,16 +62,44 @@ func (f *FilesystemRepository) LoadDomainFile(targetDomain *model.Domain) (*mode
 		return nil, err
 	}
 
-	domainCache.Add(domain)
+	coreDNSConfCache.Add(domain)
 
 	return domain, nil
 }
 
-func (f *FilesystemRepository) DeleteDomainFile(domain *model.Domain) error {
-	domainCache.Lock()
-	defer domainCache.Unlock()
+func (f *FilesystemRepository) loadAllDomainFiles() ([]*model.Domain, error) {
+	domainFileDir := model.GetHostsDir()
+	fileNameList, err := f.filesystem.GetFilenameList(domainFileDir)
+	if err != nil {
+		return nil, err
+	}
 
-	domainCache.Delete(domain)
+	var domainList []*model.Domain
+	for _, domainFile := range fileNameList {
+		domainName, err := model.NewDomainName(domainFile)
+		if err != nil {
+			log.Fatal(domainFile)
+			log.Fatal(err)
+			return nil, err
+		}
+
+		domain, err := f.LoadDomainFile(domainName)
+		if err != nil {
+			log.Fatal(domainFile)
+			log.Fatal(err)
+			return nil, err
+		}
+
+		domainList = append(domainList, domain)
+	}
+	return domainList, nil
+}
+
+func (f *FilesystemRepository) DeleteDomainFile(domain *model.Domain) error {
+	coreDNSConfCache.Lock()
+	defer coreDNSConfCache.Unlock()
+
+	coreDNSConfCache.Delete(domain)
 
 	return f.filesystem.DeleteFile(domain.Name.String())
 }

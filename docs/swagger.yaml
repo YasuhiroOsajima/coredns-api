@@ -1,0 +1,16 @@
+basePath: /v1
+host: 172.28.21.40:8080
+info:
+  contact:
+    email: support@hogehoge.hoge
+    name: Hogehoge
+    url: http://hoge.hogehoge.hoge/support
+  description: REST API to manage domain info on CoreDNS
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: CoreDNS API
+  version: "1.0"
+paths: {}
+swagger: "2.0"

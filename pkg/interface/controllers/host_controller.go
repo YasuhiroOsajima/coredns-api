@@ -1,10 +1,12 @@
 package controllers
 
 import (
-	"coredns_api/internal/model"
-	"coredns_api/internal/usecase"
 	"errors"
 	"log"
+	"net/http"
+
+	"coredns_api/internal/model"
+	"coredns_api/internal/usecase"
 )
 
 type HostRequest struct {
@@ -20,19 +22,25 @@ func NewHostController(itr *usecase.HostInteractor) *HostController {
 	return &HostController{itr}
 }
 
-// ImageHandler is to get images info
-// @Summary Get images info
-// @Description A list of images
-// @Accept  plain
-// @Produce  json
-// @Success 200
-// @Router /images [get]
+// Add handler doc
+// @Tags Host
+// @Summary Add new host
+// @Description Add new host to domain
+// @Accept json
+// @Produce json
+// @Param domain_uuid path string true "domain_uuid"
+// @Param hostname body string true "hostname"
+// @Param address body string true "address"
+// @Success 201 {object} AddResult
+// @Failure 400 {object} HTTPError
+// @Failure 500 {object} HTTPError
+// @Router /v1/domains/{domain_uuid}/hosts [post]
 func (d *HostController) Add(c Context) {
 	domainUuid := c.Param("domain_uuid")
 	dUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
 		log.Fatal(err)
-		c.JSON(400, NewError(err))
+		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -41,7 +49,7 @@ func (d *HostController) Add(c Context) {
 	if err != nil {
 		log.Fatal(err)
 		mes := errors.New("unhandled server side error")
-		c.JSON(500, NewError(mes))
+		NewError(c, http.StatusInternalServerError, mes)
 		return
 	}
 	name := request.Name
@@ -49,7 +57,7 @@ func (d *HostController) Add(c Context) {
 	newHost, err := model.NewOriginalHost(name, address)
 	if err != nil {
 		log.Fatal(err)
-		c.JSON(400, NewError(err))
+		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -57,7 +65,7 @@ func (d *HostController) Add(c Context) {
 	if err != nil {
 		log.Fatal(err)
 		mes := errors.New("unhandled server side error")
-		c.JSON(500, NewError(mes))
+		NewError(c, http.StatusInternalServerError, mes)
 		return
 	}
 
@@ -69,22 +77,35 @@ func (d *HostController) Add(c Context) {
 	result.Domain = gotDomain.Name.String()
 	result.Uuid = gotDomain.Uuid.String()
 	result.Hosts = hosts
-	c.JSON(200, result)
+	c.JSON(http.StatusCreated, result)
 }
 
+// Update handler doc
+// @Tags Host
+// @Summary Update host
+// @Description Update host info
+// @Accept json
+// @Produce json
+// @Param domain_uuid path string true "domain_uuid"
+// @Param hostname body string false "hostname"
+// @Param address body string false "address"
+// @Success 204 {object} AddResult
+// @Failure 400 {object} HTTPError
+// @Failure 500 {object} HTTPError
+// @Router /v1/domains/{domain_uuid}/hosts [patch]
 func (d *HostController) Update(c Context) {
 	domainUuid := c.Param("domain_uuid")
 	dUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
 		log.Fatal(err)
-		c.JSON(400, NewError(err))
+		NewError(c, http.StatusBadRequest, err)
 		return
 	}
-	hostUuid := c.Param("uuid")
+	hostUuid := c.Param("host_uuid")
 	hUuid, err := model.NewUuid(hostUuid)
 	if err != nil {
 		log.Fatal(err)
-		c.JSON(400, NewError(err))
+		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -93,14 +114,14 @@ func (d *HostController) Update(c Context) {
 	if err != nil {
 		log.Fatal(err)
 		mes := errors.New("unhandled server side error")
-		c.JSON(500, NewError(mes))
+		NewError(c, http.StatusInternalServerError, mes)
 		return
 	}
 
 	host, err := d.Interactor.Get(hUuid, dUuid)
 	if err != nil {
 		log.Fatal(err)
-		c.JSON(400, NewError(err))
+		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -121,14 +142,14 @@ func (d *HostController) Update(c Context) {
 	newHost, err := model.NewHost(hUuid, name, address)
 	if err != nil {
 		log.Fatal(err)
-		c.JSON(400, NewError(err))
+		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	err = d.Interactor.Update(newHost, dUuid)
 	if err != nil {
 		log.Fatal(err)
-		c.JSON(400, NewError(err))
+		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -142,36 +163,46 @@ func (d *HostController) Update(c Context) {
 	result.Domain = domain.Name.String()
 	result.Uuid = domain.Uuid.String()
 	result.Hosts = hosts
-	c.JSON(200, result)
+	c.JSON(http.StatusNoContent, result)
 }
 
+// Get handler doc
+// @Tags Host
+// @Summary Get host
+// @Description Get host info
+// @Produce json
+// @Param domain_uuid path string true "domain_uuid"
+// @Param host_uuid path string true "host_uuid"
+// @Success 200 {object} AddResult
+// @Failure 400 {object} HTTPError
+// @Router /v1/domains/{domain_uuid}/hosts/{host_uuid} [get]
 func (d *HostController) Get(c Context) {
 	domainUuid := c.Param("domain_uuid")
 	dUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
 		log.Fatal(err)
-		c.JSON(400, NewError(err))
+		NewError(c, http.StatusBadRequest, err)
 		return
 	}
-	hostUuid := c.Param("uuid")
+	hostUuid := c.Param("host_uuid")
 	hUuid, err := model.NewUuid(hostUuid)
 	if err != nil {
 		log.Fatal(err)
-		c.JSON(400, NewError(err))
+		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	host, err := d.Interactor.Get(hUuid, dUuid)
 	if err != nil {
 		log.Fatal(err)
-		c.JSON(400, NewError(err))
+		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	domain, err := d.Interactor.GetDomain(dUuid)
 	if err != nil {
 		log.Fatal(err)
-		c.JSON(400, NewError(err))
+		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -183,38 +214,47 @@ func (d *HostController) Get(c Context) {
 	result.Domain = domain.Name.String()
 	result.Uuid = domain.Uuid.String()
 	result.Hosts = hosts
-	c.JSON(200, result)
+	c.JSON(http.StatusOK, result)
 }
 
+// Delete handler doc
+// @Tags Host
+// @Summary Delete host
+// @Description Delete host info
+// @Param domain_uuid path string true "domain_uuid"
+// @Param host_uuid path string true "host_uuid"
+// @Success 204 {object} AddResult
+// @Failure 400 {object} HTTPError
+// @Router /v1/domains/{domain_uuid}/hosts/{host_uuid} [delete]
 func (d *HostController) Delete(c Context) {
 	domainUuid := c.Param("domain_uuid")
 	dUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
 		log.Fatal(err)
-		c.JSON(400, NewError(err))
+		NewError(c, http.StatusBadRequest, err)
 		return
 	}
-	hostUuid := c.Param("uuid")
+	hostUuid := c.Param("host_uuid")
 	hUuid, err := model.NewUuid(hostUuid)
 	if err != nil {
 		log.Fatal(err)
-		c.JSON(400, NewError(err))
+		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	host, err := d.Interactor.Get(hUuid, dUuid)
 	if err != nil {
 		log.Fatal(err)
-		c.JSON(400, NewError(err))
+		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	err = d.Interactor.Delete(host, dUuid)
 	if err != nil {
 		log.Fatal(err)
-		c.JSON(400, NewError(err))
+		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	c.Status(204)
+	c.Status(http.StatusNoContent)
 }

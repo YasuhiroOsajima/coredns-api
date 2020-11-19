@@ -4,9 +4,8 @@ import (
 	"coredns_api/internal/interface/repository"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"os"
 )
-
-const dbPath = "/var/lib/coredns-api/coredns-api.db"
 
 type Domain struct {
 	gorm.Model
@@ -18,18 +17,20 @@ type SQLite struct {
 	db *gorm.DB
 }
 
-func New() (*SQLite, error) {
+func NewSQLite() repository.IDatabase {
+	dbPath := os.Getenv("DB_PATH")
+
 	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	err = db.AutoMigrate(&Domain{})
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
-	return &SQLite{db: db}, nil
+	return &SQLite{db: db}
 }
 
 func (s *SQLite) SelectDomain(uuid string) (repository.Domain, error) {

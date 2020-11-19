@@ -1,0 +1,21 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "REST API to manage domain info on CoreDNS",
+        "title": "CoreDNS API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "Hogehoge",
+            "url": "http://hoge.hogehoge.hoge/support",
+            "email": "support@hogehoge.hoge"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "172.28.21.40:8080",
+    "basePath": "/v1",
+    "paths": {}
+}

@@ -2,10 +2,27 @@
 
 ## Install
 
+build
+
 ```bash
-yum install sqlite
-mkdir /var/lib/coredns-api
+bash scripts/code_build.sh 
 ```
+
+Depending OS environment variables:
+- SERVER  
+  This API server's IP address.
+- PORT  
+  This API server's HTTP listen port.
+- CONF_PATH  
+  File path of coredns conf.
+- HOSTS_DIR  
+  Directory path of coredns hosts files.
+- DB_PATH  
+  File path of SQLite3 database.
+  
+## Doc
+
+Swagger is available on `http://${SERVER}:${PORT}/swagger/index.html`.
 
 ## Usage
 
@@ -202,3 +219,7 @@ Content-Type: application/json
     ]
 }
 ```
+
+## Todo
+- Update CoreDNS conf by REST API to add and remove domains.
+- Use goroutine to update filesystem sequentially.

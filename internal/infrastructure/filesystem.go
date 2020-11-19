@@ -1,10 +1,9 @@
 package infrastructure
 
 import (
+	"coredns_api/internal/interface/repository"
 	"io/ioutil"
 	"os"
-
-	"coredns_api/internal/interface/repository"
 )
 
 type Filesystem struct{}
@@ -13,8 +12,8 @@ func NewFilesystem() repository.IFilesystem {
 	return &Filesystem{}
 }
 
-func (f *Filesystem) LoadTextFile(fileName string) (string, error) {
-	bytes, err := ioutil.ReadFile(fileName)
+func (f *Filesystem) LoadTextFile(filePath string) (string, error) {
+	bytes, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return "", err
 	}
@@ -22,8 +21,8 @@ func (f *Filesystem) LoadTextFile(fileName string) (string, error) {
 	return string(bytes), nil
 }
 
-func (f *Filesystem) WriteTextFile(fileName, fileInfo string) error {
-	file, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
+func (f *Filesystem) WriteTextFile(filePath, fileInfo string) error {
+	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		return err
 	}
@@ -36,6 +35,23 @@ func (f *Filesystem) WriteTextFile(fileName, fileInfo string) error {
 	return nil
 }
 
-func (f *Filesystem) DeleteFile(fileName string) error {
-	return os.Remove(fileName)
+func (f *Filesystem) DeleteFile(filePath string) error {
+	return os.Remove(filePath)
+}
+
+func (f *Filesystem) GetFilenameList(directory string) ([]string, error) {
+	files, err := ioutil.ReadDir(directory)
+	if err != nil {
+		return nil, err
+	}
+
+	var fileNameList []string
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		fileNameList = append(fileNameList, file.Name())
+	}
+
+	return fileNameList, nil
 }

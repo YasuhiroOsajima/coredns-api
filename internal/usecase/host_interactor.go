@@ -62,7 +62,7 @@ func (i *HostInteractor) GetDomain(domainUuid model.Uuid) (*model.Domain, error)
 		return nil, err
 	}
 
-	gotDomain, err := i.FsRepository.LoadDomainFile(targetDomain)
+	gotDomain, err := i.FsRepository.LoadDomainFile(targetDomain.Name)
 	if err != nil {
 		return nil, err
 	}

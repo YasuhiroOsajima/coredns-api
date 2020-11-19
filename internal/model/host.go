@@ -31,7 +31,7 @@ func NewOriginalHost(name, address string) (*Host, error) {
 }
 
 func NewHost(uuid Uuid, name, address string) (*Host, error) {
-	nameMatcher := regexp.MustCompile("^[0-9a-zA-Z_-]+$").MatchString
+	nameMatcher := regexp.MustCompile("^[0-9a-zA-Z._-]+$").MatchString
 	if len(name) == 0 || !nameMatcher(name) {
 		return nil, errors.New("invalid Host name is specified")
 	}
@@ -45,7 +45,8 @@ func NewHost(uuid Uuid, name, address string) (*Host, error) {
 }
 
 func (h *Host) GetHostInfo() (string, error) {
-	hostInfo := `{{ .Address }}  {{ .Name }}  # {{ .Uuid }}`
+	hostInfo := `{{ .Address }}  {{ .Name }}  # {{ .Uuid }}
+`
 	tmpl := template.Must(template.New("").Parse(hostInfo))
 
 	var out bytes.Buffer
