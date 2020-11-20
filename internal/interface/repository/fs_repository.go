@@ -1,9 +1,10 @@
 package repository
 
 import (
+	"log"
+
 	"coredns_api/internal/model"
 	"coredns_api/internal/usecase"
-	"log"
 )
 
 var coreDNSConfCache *model.CoreDNSConf
@@ -80,7 +81,7 @@ func (f *FilesystemRepository) LoadDomainFile(domainName model.DomainName) (*mod
 		return nil, usecase.NewIsNotLockedError()
 	}
 
-	domain, err := coreDNSConfCache.Get(domainName)
+	domain, err := coreDNSConfCache.GetByName(domainName)
 	if err == nil {
 		return domain, nil
 	}
@@ -135,6 +136,14 @@ func (f *FilesystemRepository) LoadAllDomains() ([]*model.Domain, error) {
 		return nil, usecase.NewIsNotLockedError()
 	}
 	return coreDNSConfCache.GetAll(), nil
+}
+
+func (f *FilesystemRepository) GetDomainByUuid(domainUuid model.Uuid) (*model.Domain, error) {
+	if !coreDNSConfCache.IsLocked() {
+		return nil, usecase.NewIsNotLockedError()
+	}
+
+	return coreDNSConfCache.GetByUuid(domainUuid)
 }
 
 func (f *FilesystemRepository) DeleteDomainFile(domain *model.Domain) error {

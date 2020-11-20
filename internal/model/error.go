@@ -23,3 +23,27 @@ func NewServerSideError(text string) error {
 func (e *ServerSideError) Error() string {
 	return e.err
 }
+
+type DomainNotFoundError struct {
+	err string
+}
+
+func NewDomainNotFoundError() error {
+	return &DomainNotFoundError{err: "target domain is not found in CoreDNS"}
+}
+
+func (e *DomainNotFoundError) Error() string {
+	return e.err
+}
+
+type HostNotFoundError struct {
+	err string
+}
+
+func NewHostNotFoundError() error {
+	return &HostNotFoundError{err: "target host is not found in CoreDNS"}
+}
+
+func (e *HostNotFoundError) Error() string {
+	return e.err
+}

@@ -16,9 +16,7 @@ func InitializeDomainController() *controllers.DomainController {
 		controllers.NewDomainController,
 		usecase.NewDomainInteractor,
 		repository.NewFileRepository,
-		repository.NewDatabaseRepository,
 		inf.NewFilesystem,
-		inf.NewSQLite,
 	)
 	return nil
 }
@@ -28,9 +26,7 @@ func InitializeHostController() *controllers.HostController {
 		controllers.NewHostController,
 		usecase.NewHostInteractor,
 		repository.NewFileRepository,
-		repository.NewDatabaseRepository,
 		inf.NewFilesystem,
-		inf.NewSQLite,
 	)
 	return nil
 }

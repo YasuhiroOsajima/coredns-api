@@ -62,13 +62,23 @@ func (d *CoreDNSConf) Add(domain *Domain) {
 	d.Cache[domain.Name] = domain
 }
 
-func (d *CoreDNSConf) Get(domainName DomainName) (*Domain, error) {
+func (d *CoreDNSConf) GetByName(domainName DomainName) (*Domain, error) {
 	domain := d.Cache[domainName]
 	if domain == nil {
 		return nil, NewInvalidParameterGiven("target domain chache is not found. domain: " + domainName.String())
 	}
 
 	return domain, nil
+}
+
+func (d *CoreDNSConf) GetByUuid(domainUuid Uuid) (*Domain, error) {
+	for _, domain := range d.Cache {
+		if domain.Uuid == domainUuid {
+			return domain, nil
+		}
+	}
+	return nil, NewDomainNotFoundError()
+
 }
 
 func (d *CoreDNSConf) GetAll() []*Domain {

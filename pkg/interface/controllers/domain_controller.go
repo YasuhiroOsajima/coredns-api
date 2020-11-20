@@ -145,6 +145,7 @@ func (d *DomainController) List(c Context) {
 // @Param domain_uuid path string true "domain_uuid"
 // @Success 200 {object} AddResult
 // @Failure 400 {object} HTTPError
+// @Failure 404 {object} HTTPError
 // @Failure 500 {object} HTTPError
 // @Router /v1/domains/{domain_uuid} [get]
 func (d *DomainController) Get(c Context) {
@@ -161,7 +162,7 @@ func (d *DomainController) Get(c Context) {
 		switch e := err.(type) {
 		case *model.InvalidParameterGiven:
 			NewError(c, http.StatusBadRequest, err)
-		case *usecase.RecordNotFoundError:
+		case *model.DomainNotFoundError:
 			NewError(c, http.StatusNotFound, err)
 		default:
 			NewError(c,
@@ -193,6 +194,7 @@ func (d *DomainController) Get(c Context) {
 // @Param domain_uuid path string true "domain_uuid"
 // @Success 204
 // @Failure 400 {object} HTTPError
+// @Failure 404 {object} HTTPError
 // @Failure 500 {object} HTTPError
 // @Router /v1/domains/{domain_uuid} [delete]
 func (d *DomainController) Delete(c Context) {
@@ -209,7 +211,7 @@ func (d *DomainController) Delete(c Context) {
 		switch e := err.(type) {
 		case *model.InvalidParameterGiven:
 			NewError(c, http.StatusBadRequest, err)
-		case *usecase.RecordNotFoundError:
+		case *model.DomainNotFoundError:
 			NewError(c, http.StatusNotFound, err)
 		default:
 			NewError(c,

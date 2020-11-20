@@ -17,9 +17,7 @@ import (
 func InitializeDomainController() *controllers.DomainController {
 	iFilesystem := infrastructure.NewFilesystem()
 	iFilesystemRepository := repository.NewFileRepository(iFilesystem)
-	iDatabase := infrastructure.NewSQLite()
-	iDatabaseRepository := repository.NewDatabaseRepository(iDatabase)
-	domainInteractor := usecase.NewDomainInteractor(iFilesystemRepository, iDatabaseRepository)
+	domainInteractor := usecase.NewDomainInteractor(iFilesystemRepository)
 	domainController := controllers.NewDomainController(domainInteractor)
 	return domainController
 }
@@ -27,9 +25,7 @@ func InitializeDomainController() *controllers.DomainController {
 func InitializeHostController() *controllers.HostController {
 	iFilesystem := infrastructure.NewFilesystem()
 	iFilesystemRepository := repository.NewFileRepository(iFilesystem)
-	iDatabase := infrastructure.NewSQLite()
-	iDatabaseRepository := repository.NewDatabaseRepository(iDatabase)
-	hostInteractor := usecase.NewHostInteractor(iFilesystemRepository, iDatabaseRepository)
+	hostInteractor := usecase.NewHostInteractor(iFilesystemRepository)
 	hostController := controllers.NewHostController(hostInteractor)
 	return hostController
 }

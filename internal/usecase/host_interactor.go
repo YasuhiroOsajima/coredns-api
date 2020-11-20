@@ -6,11 +6,10 @@ import (
 
 type HostInteractor struct {
 	fsRepository IFilesystemRepository
-	dbRepository IDatabaseRepository
 }
 
-func NewHostInteractor(fRepo IFilesystemRepository, dRepo IDatabaseRepository) *HostInteractor {
-	return &HostInteractor{fRepo, dRepo}
+func NewHostInteractor(fRepo IFilesystemRepository) *HostInteractor {
+	return &HostInteractor{fRepo}
 }
 
 func (i *HostInteractor) Add(newHost *model.Host, domainUuid model.Uuid) (*model.Domain, error) {
@@ -57,24 +56,19 @@ func (i *HostInteractor) Get(hostUuid, domainUuid model.Uuid) (*model.Host, erro
 		}
 	}
 
-	return nil, NewHostNotFoundError()
+	return nil, model.NewHostNotFoundError()
 }
 
 func (i *HostInteractor) GetDomain(domainUuid model.Uuid) (*model.Domain, error) {
 	i.fsRepository.Lock()
 	defer i.fsRepository.UnLock()
 
-	targetDomain, err := i.dbRepository.GetDomain(domainUuid)
+	targetDomain, err := i.fsRepository.GetDomainByUuid(domainUuid)
 	if err != nil {
 		return nil, err
 	}
 
-	gotDomain, err := i.fsRepository.LoadDomainFile(targetDomain.Name)
-	if err != nil {
-		return nil, err
-	}
-
-	return gotDomain, nil
+	return targetDomain, nil
 }
 
 func (i *HostInteractor) Update(newHost *model.Host, domainUuid model.Uuid) error {
@@ -98,7 +92,7 @@ func (i *HostInteractor) Update(newHost *model.Host, domainUuid model.Uuid) erro
 	}
 
 	if !found {
-		return NewHostNotFoundError()
+		return model.NewHostNotFoundError()
 	}
 
 	domain.Hosts = newHosts
@@ -125,7 +119,7 @@ func (i *HostInteractor) Delete(host *model.Host, domainUuid model.Uuid) error {
 	}
 
 	if !found {
-		return NewHostNotFoundError()
+		return model.NewHostNotFoundError()
 	}
 
 	domain.Hosts = newHosts
