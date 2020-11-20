@@ -74,7 +74,7 @@ func (d *DomainController) Add(c Context) {
 		NewError(c,
 			http.StatusInternalServerError,
 			NewUnAvailableHandlingError())
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -88,9 +88,9 @@ func (d *DomainController) Add(c Context) {
 			NewError(c,
 				http.StatusInternalServerError,
 				NewUnAvailableHandlingError())
-			log.Fatal(e)
+			log.Print(e)
 		}
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -99,7 +99,7 @@ func (d *DomainController) Add(c Context) {
 		NewError(c,
 			http.StatusInternalServerError,
 			NewUnAvailableHandlingError())
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -123,7 +123,7 @@ func (d *DomainController) List(c Context) {
 		NewError(c,
 			http.StatusInternalServerError,
 			NewUnAvailableHandlingError())
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -152,7 +152,7 @@ func (d *DomainController) Get(c Context) {
 	targetDomainUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
 		NewError(c, http.StatusBadRequest, err)
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -167,9 +167,9 @@ func (d *DomainController) Get(c Context) {
 			NewError(c,
 				http.StatusInternalServerError,
 				NewUnAvailableHandlingError())
-			log.Fatal(e)
+			log.Print(e)
 		}
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -200,7 +200,7 @@ func (d *DomainController) Delete(c Context) {
 	targetDomainUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
 		NewError(c, http.StatusBadRequest, err)
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -215,9 +215,9 @@ func (d *DomainController) Delete(c Context) {
 			NewError(c,
 				http.StatusInternalServerError,
 				NewUnAvailableHandlingError())
-			log.Fatal(e)
+			log.Print(e)
 		}
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 

@@ -1,10 +1,9 @@
 package repository
 
 import (
-	"log"
-
 	"coredns_api/internal/model"
 	"coredns_api/internal/usecase"
+	"log"
 )
 
 var coreDNSConfCache *model.CoreDNSConf
@@ -33,7 +32,7 @@ func (f *FilesystemRepository) WriteConfCache() error {
 	confPath := coreDNSConfCache.ConfPath
 	confInfo, err := coreDNSConfCache.GetFileInfo()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 		return err
 	}
 
@@ -48,18 +47,32 @@ func (f *FilesystemRepository) WriteDomainFile(domain *model.Domain) error {
 	name := domain.Name
 	fileInfo, err := domain.GetFileInfo()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 		return err
 	}
 
 	err = f.filesystem.WriteTextFile(name.String(), fileInfo)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 		return err
 	}
 
 	coreDNSConfCache.Add(domain)
 	return nil
+}
+
+func (f *FilesystemRepository) loadDomainFileInitial(domainName model.DomainName, domainInfoFilePath string) (*model.Domain, error) {
+	fileInfo, err := f.filesystem.LoadTextFile(domainInfoFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	domain, err := model.NewDomain(domainName.String(), fileInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	return domain, nil
 }
 
 func (f *FilesystemRepository) LoadDomainFile(domainName model.DomainName) (*model.Domain, error) {
@@ -88,10 +101,6 @@ func (f *FilesystemRepository) LoadDomainFile(domainName model.DomainName) (*mod
 }
 
 func (f *FilesystemRepository) loadAllDomainFiles() ([]*model.Domain, error) {
-	if !coreDNSConfCache.IsLocked() {
-		return nil, usecase.NewIsNotLockedError()
-	}
-
 	domainFileDir := model.GetHostsDir()
 	fileNameList, err := f.filesystem.GetFilenameList(domainFileDir)
 	if err != nil {
@@ -102,15 +111,16 @@ func (f *FilesystemRepository) loadAllDomainFiles() ([]*model.Domain, error) {
 	for _, domainFile := range fileNameList {
 		domainName, err := model.NewDomainName(domainFile)
 		if err != nil {
-			log.Fatal(domainFile)
-			log.Fatal(err)
+			log.Print(domainFile)
+			log.Print(err)
 			return nil, err
 		}
 
-		domain, err := f.LoadDomainFile(domainName)
+		filePath := model.GetHostsFilePath(domainName)
+		domain, err := f.loadDomainFileInitial(domainName, filePath)
 		if err != nil {
-			log.Fatal(domainFile)
-			log.Fatal(err)
+			log.Print(domainFile)
+			log.Print(err)
 			return nil, err
 		}
 

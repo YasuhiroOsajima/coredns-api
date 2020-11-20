@@ -39,7 +39,7 @@ func (d *HostController) Add(c Context) {
 	targetDomainUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
 		NewError(c, http.StatusBadRequest, err)
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -49,7 +49,7 @@ func (d *HostController) Add(c Context) {
 		NewError(c,
 			http.StatusInternalServerError,
 			NewUnAvailableHandlingError())
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -64,9 +64,9 @@ func (d *HostController) Add(c Context) {
 			NewError(c,
 				http.StatusInternalServerError,
 				NewUnAvailableHandlingError())
-			log.Fatal(e)
+			log.Print(e)
 		}
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -81,9 +81,9 @@ func (d *HostController) Add(c Context) {
 			NewError(c,
 				http.StatusInternalServerError,
 				NewUnAvailableHandlingError())
-			log.Fatal(e)
+			log.Print(e)
 		}
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -116,7 +116,7 @@ func (d *HostController) Update(c Context) {
 	targetDomainUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
 		NewError(c, http.StatusBadRequest, err)
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -124,7 +124,7 @@ func (d *HostController) Update(c Context) {
 	targetHostUuid, err := model.NewUuid(hostUuid)
 	if err != nil {
 		NewError(c, http.StatusBadRequest, err)
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -137,9 +137,9 @@ func (d *HostController) Update(c Context) {
 			NewError(c,
 				http.StatusInternalServerError,
 				NewUnAvailableHandlingError())
-			log.Fatal(e)
+			log.Print(e)
 		}
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -149,7 +149,7 @@ func (d *HostController) Update(c Context) {
 		NewError(c,
 			http.StatusInternalServerError,
 			NewUnAvailableHandlingError())
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -170,7 +170,7 @@ func (d *HostController) Update(c Context) {
 	updatedHost, err := model.NewHost(targetHostUuid, name, address)
 	if err != nil {
 		NewError(c, http.StatusBadRequest, err)
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -183,9 +183,9 @@ func (d *HostController) Update(c Context) {
 			NewError(c,
 				http.StatusInternalServerError,
 				NewUnAvailableHandlingError())
-			log.Fatal(e)
+			log.Print(e)
 		}
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -194,7 +194,7 @@ func (d *HostController) Update(c Context) {
 		NewError(c,
 			http.StatusInternalServerError,
 			NewUnAvailableHandlingError())
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -224,7 +224,7 @@ func (d *HostController) Get(c Context) {
 	targetDomainUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
 		NewError(c, http.StatusBadRequest, err)
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -232,7 +232,7 @@ func (d *HostController) Get(c Context) {
 	targetHostUuid, err := model.NewUuid(hostUuid)
 	if err != nil {
 		NewError(c, http.StatusBadRequest, err)
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -245,9 +245,9 @@ func (d *HostController) Get(c Context) {
 			NewError(c,
 				http.StatusInternalServerError,
 				NewUnAvailableHandlingError())
-			log.Fatal(e)
+			log.Print(e)
 		}
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -256,7 +256,7 @@ func (d *HostController) Get(c Context) {
 		NewError(c,
 			http.StatusInternalServerError,
 			NewUnAvailableHandlingError())
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -285,7 +285,7 @@ func (d *HostController) Delete(c Context) {
 	targetDomainUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
 		NewError(c, http.StatusBadRequest, err)
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -293,7 +293,7 @@ func (d *HostController) Delete(c Context) {
 	targetHostUuid, err := model.NewUuid(hostUuid)
 	if err != nil {
 		NewError(c, http.StatusBadRequest, err)
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -306,9 +306,9 @@ func (d *HostController) Delete(c Context) {
 			NewError(c,
 				http.StatusInternalServerError,
 				NewUnAvailableHandlingError())
-			log.Fatal(e)
+			log.Print(e)
 		}
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 
@@ -321,9 +321,9 @@ func (d *HostController) Delete(c Context) {
 			NewError(c,
 				http.StatusInternalServerError,
 				NewUnAvailableHandlingError())
-			log.Fatal(e)
+			log.Print(e)
 		}
-		log.Fatal(err)
+		log.Print(err)
 		return
 	}
 

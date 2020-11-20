@@ -1,9 +1,10 @@
 package infrastructure
 
 import (
-	"coredns_api/internal/interface/repository"
 	"io/ioutil"
 	"os"
+
+	"coredns_api/internal/interface/repository"
 )
 
 type Filesystem struct{}

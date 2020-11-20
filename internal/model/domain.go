@@ -9,6 +9,10 @@ import (
 	"github.com/google/uuid"
 )
 
+func GetHostsFilePath(domainName DomainName) string {
+	return filepath.Join(GetHostsDir(), domainName.String())
+}
+
 type Domain struct {
 	Uuid           Uuid
 	Name           DomainName
@@ -35,7 +39,7 @@ func NewEmptyDomain(uuid Uuid, name string) (*Domain, error) {
 	}
 
 	var hosts []*Host
-	hostsPath := filepath.Join(GetHostsDir(), name)
+	hostsPath := GetHostsFilePath(domainName)
 
 	domain := &Domain{
 		Uuid:           uuid,
@@ -75,7 +79,7 @@ func NewDomain(name, fileInfo string) (*Domain, error) {
 			if err != nil {
 				return nil, err
 			}
-		} else {
+		} else if strings.Contains(commentInfo, "-") && strings.Contains(commentInfo, ".") && strings.Contains(commentInfo, "#") {
 			hostId := splitComment[0]
 			splitHost := strings.Fields(hostInfo)
 			address := splitHost[0]

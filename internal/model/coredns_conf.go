@@ -55,7 +55,7 @@ func NewCoreDNSConf(allDomainInfo []*Domain) *CoreDNSConf {
 	for _, dom := range allDomainInfo {
 		cache[dom.Name] = dom
 	}
-	return &CoreDNSConf{Cache: cache, ConfPath: confPath, forward: forward}
+	return &CoreDNSConf{locked: 0, Cache: cache, forward: forward, ConfPath: confPath}
 }
 
 func (d *CoreDNSConf) Add(domain *Domain) {
@@ -92,7 +92,7 @@ func (d *CoreDNSConf) GetFileInfo() (string, error) {
 		var out bytes.Buffer
 		err := tmpl.Execute(&out, dom)
 		if err != nil {
-			log.Fatal(err)
+			log.Print(err)
 			return "", err
 		}
 		domainInfoBottom := out.String()
