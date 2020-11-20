@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"errors"
 	"log"
 	"net/http"
 
@@ -9,10 +8,12 @@ import (
 	"coredns_api/internal/usecase"
 )
 
+// Request
 type DomainRequest struct {
 	Name string `json:"domain"`
 }
 
+// Result
 type AddResult struct {
 	DomainResult
 	Hosts []HostResult `json:"hosts"`
@@ -33,6 +34,20 @@ type DomainListResult struct {
 	Domains []DomainResult `json:"domains"`
 }
 
+// error to return with HTTP 500
+type UnAvailableHandlingError struct {
+	err string
+}
+
+func NewUnAvailableHandlingError() error {
+	return &UnAvailableHandlingError{err: "unhandled server side error"}
+}
+
+func (e *UnAvailableHandlingError) Error() string {
+	return e.err
+}
+
+// Controller
 type DomainController struct {
 	interactor *usecase.DomainInteractor
 }
@@ -56,31 +71,41 @@ func (d *DomainController) Add(c Context) {
 	var request DomainRequest
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
+		NewError(c,
+			http.StatusInternalServerError,
+			NewUnAvailableHandlingError())
 		log.Fatal(err)
-		mes := errors.New("unhandled server side error")
-		NewError(c, http.StatusInternalServerError, mes)
 		return
 	}
 
 	name := request.Name
-	dom, err := model.NewOriginalDomain(name)
+	newDomain, err := model.NewOriginalDomain(name)
 	if err != nil {
+		switch e := err.(type) {
+		case *model.InvalidParameterGiven:
+			NewError(c, http.StatusBadRequest, err)
+		default:
+			NewError(c,
+				http.StatusInternalServerError,
+				NewUnAvailableHandlingError())
+			log.Fatal(e)
+		}
 		log.Fatal(err)
-		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	err = d.interactor.Add(dom)
+	err = d.interactor.Add(newDomain)
 	if err != nil {
+		NewError(c,
+			http.StatusInternalServerError,
+			NewUnAvailableHandlingError())
 		log.Fatal(err)
-		mes := errors.New("unhandled server side error")
-		NewError(c, http.StatusInternalServerError, mes)
 		return
 	}
 
 	var result AddResult
-	result.Domain = dom.Name.String()
-	result.Uuid = dom.Uuid.String()
+	result.Domain = newDomain.Name.String()
+	result.Uuid = newDomain.Uuid.String()
 	c.JSON(http.StatusCreated, result)
 }
 
@@ -93,11 +118,12 @@ func (d *DomainController) Add(c Context) {
 // @Failure 500 {object} HTTPError
 // @Router /v1/domains [get]
 func (d *DomainController) List(c Context) {
-	domainList, err := d.interactor.DbRepository.GetDomainsList()
+	domainList, err := d.interactor.GetDomainsList()
 	if err != nil {
+		NewError(c,
+			http.StatusInternalServerError,
+			NewUnAvailableHandlingError())
 		log.Fatal(err)
-		mes := errors.New("unhandled server side error")
-		NewError(c, http.StatusInternalServerError, mes)
 		return
 	}
 
@@ -123,17 +149,19 @@ func (d *DomainController) List(c Context) {
 // @Router /v1/domains/{domain_uuid} [get]
 func (d *DomainController) Get(c Context) {
 	domainUuid := c.Param("domain_uuid")
-	dUuid, err := model.NewUuid(domainUuid)
+	targetDomainUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
-		log.Fatal(err)
 		NewError(c, http.StatusBadRequest, err)
+		log.Fatal(err)
 		return
 	}
 
-	gotDomain, err := d.interactor.Get(dUuid)
+	gotDomain, err := d.interactor.Get(targetDomainUuid)
 	if err != nil {
+		NewError(c,
+			http.StatusInternalServerError,
+			NewUnAvailableHandlingError())
 		log.Fatal(err)
-		NewError(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -161,17 +189,19 @@ func (d *DomainController) Get(c Context) {
 // @Router /v1/domains/{domain_uuid} [delete]
 func (d *DomainController) Delete(c Context) {
 	domainUuid := c.Param("domain_uuid")
-	dUuid, err := model.NewUuid(domainUuid)
+	targetDomainUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
-		log.Fatal(err)
 		NewError(c, http.StatusBadRequest, err)
+		log.Fatal(err)
 		return
 	}
 
-	err = d.interactor.Delete(dUuid)
+	err = d.interactor.Delete(targetDomainUuid)
 	if err != nil {
+		NewError(c,
+			http.StatusInternalServerError,
+			NewUnAvailableHandlingError())
 		log.Fatal(err)
-		NewError(c, http.StatusInternalServerError, err)
 		return
 	}
 

@@ -2,11 +2,11 @@ package model
 
 import (
 	"bytes"
-	"errors"
-	"github.com/google/uuid"
 	"regexp"
 	"strings"
 	"text/template"
+
+	"github.com/google/uuid"
 )
 
 type Host struct {
@@ -33,12 +33,14 @@ func NewOriginalHost(name, address string) (*Host, error) {
 func NewHost(uuid Uuid, name, address string) (*Host, error) {
 	nameMatcher := regexp.MustCompile("^[0-9a-zA-Z._-]+$").MatchString
 	if len(name) == 0 || !nameMatcher(name) {
-		return nil, errors.New("invalid Host name is specified")
+		mes := "invalid Host name is specified with uuid: '" + uuid.String() + "', nam: '" + name + "', address: '" + address + "'"
+		return nil, NewInvalidParameterGiven(mes)
 	}
 
 	ipMatcher := regexp.MustCompile("^[0-9.]+$").MatchString
 	if len(address) < 7 || len(address) > 15 || strings.Count(address, ".") != 3 || !ipMatcher(address) {
-		return nil, errors.New("invalid Host name is specified")
+		mes := "invalid IP address is specified with uuid: '" + uuid.String() + "', nam: '" + name + "', address: '" + address + "'"
+		return nil, NewInvalidParameterGiven(mes)
 	}
 
 	return &Host{uuid, name, address}, nil

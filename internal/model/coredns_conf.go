@@ -2,7 +2,6 @@ package model
 
 import (
 	"bytes"
-	"errors"
 	"log"
 	"os"
 	"strings"
@@ -37,10 +36,12 @@ func GetHostsDir() string {
 
 type CoreDNSConf struct {
 	sync.Mutex
+	locked int
+
 	Cache map[DomainName]*Domain
 
-	confPath string
 	forward  string
+	ConfPath string
 }
 
 func NewCoreDNSConf(allDomainInfo []*Domain) *CoreDNSConf {
@@ -54,7 +55,7 @@ func NewCoreDNSConf(allDomainInfo []*Domain) *CoreDNSConf {
 	for _, dom := range allDomainInfo {
 		cache[dom.Name] = dom
 	}
-	return &CoreDNSConf{Cache: cache, confPath: confPath, forward: forward}
+	return &CoreDNSConf{Cache: cache, ConfPath: confPath, forward: forward}
 }
 
 func (d *CoreDNSConf) Add(domain *Domain) {
@@ -64,7 +65,7 @@ func (d *CoreDNSConf) Add(domain *Domain) {
 func (d *CoreDNSConf) Get(domainName DomainName) (*Domain, error) {
 	domain := d.Cache[domainName]
 	if domain == nil {
-		return nil, errors.New("target domain chache is not found")
+		return nil, NewInvalidParameterGiven("target domain chache is not found. domain: " + domainName.String())
 	}
 
 	return domain, nil
@@ -91,7 +92,7 @@ func (d *CoreDNSConf) GetFileInfo() (string, error) {
 		var out bytes.Buffer
 		err := tmpl.Execute(&out, dom)
 		if err != nil {
-			log.Fatal(dom)
+			log.Fatal(err)
 			return "", err
 		}
 		domainInfoBottom := out.String()
@@ -100,4 +101,22 @@ func (d *CoreDNSConf) GetFileInfo() (string, error) {
 
 	conf = conf + d.forward
 	return conf, nil
+}
+
+func (d *CoreDNSConf) IsLocked() bool {
+	if d.locked == 0 {
+		return false
+	} else {
+		return true
+	}
+}
+
+func (d *CoreDNSConf) SetLocke() {
+	d.Lock()
+	d.locked += 1
+}
+
+func (d *CoreDNSConf) UnSetLocke() {
+	d.Unlock()
+	d.locked -= 1
 }

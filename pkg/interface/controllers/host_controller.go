@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"errors"
 	"log"
 	"net/http"
 
@@ -37,35 +36,46 @@ func NewHostController(itr *usecase.HostInteractor) *HostController {
 // @Router /v1/domains/{domain_uuid}/hosts [post]
 func (d *HostController) Add(c Context) {
 	domainUuid := c.Param("domain_uuid")
-	dUuid, err := model.NewUuid(domainUuid)
+	targetDomainUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
-		log.Fatal(err)
 		NewError(c, http.StatusBadRequest, err)
+		log.Fatal(err)
 		return
 	}
 
-	var request HostRequest
-	err = c.ShouldBindJSON(&request)
+	var requestedHost HostRequest
+	err = c.ShouldBindJSON(&requestedHost)
 	if err != nil {
+		NewError(c,
+			http.StatusInternalServerError,
+			NewUnAvailableHandlingError())
 		log.Fatal(err)
-		mes := errors.New("unhandled server side error")
-		NewError(c, http.StatusInternalServerError, mes)
 		return
 	}
-	name := request.Name
-	address := request.Address
+
+	name := requestedHost.Name
+	address := requestedHost.Address
 	newHost, err := model.NewOriginalHost(name, address)
 	if err != nil {
+		switch e := err.(type) {
+		case *model.InvalidParameterGiven:
+			NewError(c, http.StatusBadRequest, err)
+		default:
+			NewError(c,
+				http.StatusInternalServerError,
+				NewUnAvailableHandlingError())
+			log.Fatal(e)
+		}
 		log.Fatal(err)
-		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	gotDomain, err := d.Interactor.Add(newHost, dUuid)
+	gotDomain, err := d.Interactor.Add(newHost, targetDomainUuid)
 	if err != nil {
+		NewError(c,
+			http.StatusInternalServerError,
+			NewUnAvailableHandlingError())
 		log.Fatal(err)
-		mes := errors.New("unhandled server side error")
-		NewError(c, http.StatusInternalServerError, mes)
 		return
 	}
 
@@ -95,68 +105,74 @@ func (d *HostController) Add(c Context) {
 // @Router /v1/domains/{domain_uuid}/hosts [patch]
 func (d *HostController) Update(c Context) {
 	domainUuid := c.Param("domain_uuid")
-	dUuid, err := model.NewUuid(domainUuid)
+	targetDomainUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
-		log.Fatal(err)
 		NewError(c, http.StatusBadRequest, err)
+		log.Fatal(err)
 		return
 	}
+
 	hostUuid := c.Param("host_uuid")
-	hUuid, err := model.NewUuid(hostUuid)
+	targetHostUuid, err := model.NewUuid(hostUuid)
 	if err != nil {
-		log.Fatal(err)
 		NewError(c, http.StatusBadRequest, err)
+		log.Fatal(err)
 		return
 	}
 
-	var request HostRequest
-	err = c.ShouldBindJSON(&request)
+	host, err := d.Interactor.Get(targetHostUuid, targetDomainUuid)
 	if err != nil {
+		NewError(c,
+			http.StatusInternalServerError,
+			NewUnAvailableHandlingError())
 		log.Fatal(err)
-		mes := errors.New("unhandled server side error")
-		NewError(c, http.StatusInternalServerError, mes)
 		return
 	}
 
-	host, err := d.Interactor.Get(hUuid, dUuid)
+	var requestedHostInfo HostRequest
+	err = c.ShouldBindJSON(&requestedHostInfo)
 	if err != nil {
+		NewError(c,
+			http.StatusInternalServerError,
+			NewUnAvailableHandlingError())
 		log.Fatal(err)
-		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	var name string
-	if request.Name != "" {
-		name = request.Name
+	if requestedHostInfo.Name != "" {
+		name = requestedHostInfo.Name
 	} else {
 		name = host.Name
 	}
 
 	var address string
-	if request.Address != "" {
-		address = request.Address
+	if requestedHostInfo.Address != "" {
+		address = requestedHostInfo.Address
 	} else {
 		address = host.Address
 	}
 
-	newHost, err := model.NewHost(hUuid, name, address)
+	updatedHost, err := model.NewHost(targetHostUuid, name, address)
 	if err != nil {
-		log.Fatal(err)
 		NewError(c, http.StatusBadRequest, err)
+		log.Fatal(err)
 		return
 	}
 
-	err = d.Interactor.Update(newHost, dUuid)
+	err = d.Interactor.Update(updatedHost, targetDomainUuid)
 	if err != nil {
+		NewError(c,
+			http.StatusInternalServerError,
+			NewUnAvailableHandlingError())
 		log.Fatal(err)
-		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	domain, _ := d.Interactor.GetDomain(dUuid)
+	domain, _ := d.Interactor.GetDomain(targetDomainUuid)
 
 	var hosts []HostResult
-	hostRes := HostResult{Name: newHost.Name, Address: newHost.Address, Uuid: newHost.Uuid.String()}
+	hostRes := HostResult{Name: updatedHost.Name, Address: updatedHost.Address, Uuid: updatedHost.Uuid.String()}
 	hosts = append(hosts, hostRes)
 
 	var result AddResult
@@ -178,31 +194,36 @@ func (d *HostController) Update(c Context) {
 // @Router /v1/domains/{domain_uuid}/hosts/{host_uuid} [get]
 func (d *HostController) Get(c Context) {
 	domainUuid := c.Param("domain_uuid")
-	dUuid, err := model.NewUuid(domainUuid)
+	targetDomainUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
-		log.Fatal(err)
 		NewError(c, http.StatusBadRequest, err)
+		log.Fatal(err)
 		return
 	}
+
 	hostUuid := c.Param("host_uuid")
-	hUuid, err := model.NewUuid(hostUuid)
+	targetHostUuid, err := model.NewUuid(hostUuid)
 	if err != nil {
-		log.Fatal(err)
 		NewError(c, http.StatusBadRequest, err)
+		log.Fatal(err)
 		return
 	}
 
-	host, err := d.Interactor.Get(hUuid, dUuid)
+	host, err := d.Interactor.Get(targetHostUuid, targetDomainUuid)
 	if err != nil {
+		NewError(c,
+			http.StatusInternalServerError,
+			NewUnAvailableHandlingError())
 		log.Fatal(err)
-		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	domain, err := d.Interactor.GetDomain(dUuid)
+	domain, err := d.Interactor.GetDomain(targetDomainUuid)
 	if err != nil {
+		NewError(c,
+			http.StatusInternalServerError,
+			NewUnAvailableHandlingError())
 		log.Fatal(err)
-		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -228,31 +249,36 @@ func (d *HostController) Get(c Context) {
 // @Router /v1/domains/{domain_uuid}/hosts/{host_uuid} [delete]
 func (d *HostController) Delete(c Context) {
 	domainUuid := c.Param("domain_uuid")
-	dUuid, err := model.NewUuid(domainUuid)
+	targetDomainUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
-		log.Fatal(err)
 		NewError(c, http.StatusBadRequest, err)
+		log.Fatal(err)
 		return
 	}
+
 	hostUuid := c.Param("host_uuid")
-	hUuid, err := model.NewUuid(hostUuid)
+	targetHostUuid, err := model.NewUuid(hostUuid)
 	if err != nil {
-		log.Fatal(err)
 		NewError(c, http.StatusBadRequest, err)
+		log.Fatal(err)
 		return
 	}
 
-	host, err := d.Interactor.Get(hUuid, dUuid)
+	host, err := d.Interactor.Get(targetHostUuid, targetDomainUuid)
 	if err != nil {
+		NewError(c,
+			http.StatusInternalServerError,
+			NewUnAvailableHandlingError())
 		log.Fatal(err)
-		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	err = d.Interactor.Delete(host, dUuid)
+	err = d.Interactor.Delete(host, targetDomainUuid)
 	if err != nil {
+		NewError(c,
+			http.StatusInternalServerError,
+			NewUnAvailableHandlingError())
 		log.Fatal(err)
-		NewError(c, http.StatusBadRequest, err)
 		return
 	}
 

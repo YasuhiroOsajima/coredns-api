@@ -14,7 +14,6 @@ type FilesystemRepository struct {
 }
 
 func NewFileRepository(fs IFilesystem) usecase.IFilesystemRepository {
-
 	f := &FilesystemRepository{fs}
 
 	allDomainInfo, err := f.loadAllDomainFiles()
@@ -26,26 +25,47 @@ func NewFileRepository(fs IFilesystem) usecase.IFilesystemRepository {
 	return f
 }
 
+func (f *FilesystemRepository) WriteConfCache() error {
+	if !coreDNSConfCache.IsLocked() {
+		return usecase.NewIsNotLocked()
+	}
+
+	confPath := coreDNSConfCache.ConfPath
+	confInfo, err := coreDNSConfCache.GetFileInfo()
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	return f.filesystem.WriteTextFile(confPath, confInfo)
+}
+
 func (f *FilesystemRepository) WriteDomainFile(domain *model.Domain) error {
-	coreDNSConfCache.Lock()
-	defer coreDNSConfCache.Unlock()
+	if !coreDNSConfCache.IsLocked() {
+		return usecase.NewIsNotLocked()
+	}
 
 	name := domain.Name
 	fileInfo, err := domain.GetFileInfo()
 	if err != nil {
+		log.Fatal(err)
 		return err
 	}
 
 	err = f.filesystem.WriteTextFile(name.String(), fileInfo)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
 
 	coreDNSConfCache.Add(domain)
-
-	return err
+	return nil
 }
 
 func (f *FilesystemRepository) LoadDomainFile(domainName model.DomainName) (*model.Domain, error) {
-	coreDNSConfCache.Lock()
-	defer coreDNSConfCache.Unlock()
+	if !coreDNSConfCache.IsLocked() {
+		return nil, usecase.NewIsNotLocked()
+	}
 
 	domain, err := coreDNSConfCache.Get(domainName)
 	if err == nil {
@@ -68,6 +88,10 @@ func (f *FilesystemRepository) LoadDomainFile(domainName model.DomainName) (*mod
 }
 
 func (f *FilesystemRepository) loadAllDomainFiles() ([]*model.Domain, error) {
+	if !coreDNSConfCache.IsLocked() {
+		return nil, usecase.NewIsNotLocked()
+	}
+
 	domainFileDir := model.GetHostsDir()
 	fileNameList, err := f.filesystem.GetFilenameList(domainFileDir)
 	if err != nil {
@@ -96,10 +120,24 @@ func (f *FilesystemRepository) loadAllDomainFiles() ([]*model.Domain, error) {
 }
 
 func (f *FilesystemRepository) DeleteDomainFile(domain *model.Domain) error {
-	coreDNSConfCache.Lock()
-	defer coreDNSConfCache.Unlock()
+	if !coreDNSConfCache.IsLocked() {
+		return usecase.NewIsNotLocked()
+	}
+
+	err := f.filesystem.DeleteFile(domain.Name.String())
+	if err != nil {
+		return err
+	}
 
 	coreDNSConfCache.Delete(domain)
 
-	return f.filesystem.DeleteFile(domain.Name.String())
+	return nil
+}
+
+func (f *FilesystemRepository) Lock() {
+	coreDNSConfCache.SetLocke()
+}
+
+func (f *FilesystemRepository) UnLock() {
+	coreDNSConfCache.UnSetLocke()
 }

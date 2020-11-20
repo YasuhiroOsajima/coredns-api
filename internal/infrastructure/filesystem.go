@@ -22,11 +22,13 @@ func (f *Filesystem) LoadTextFile(filePath string) (string, error) {
 }
 
 func (f *Filesystem) WriteTextFile(filePath, fileInfo string) error {
-	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
+	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}
+
 	defer file.Close()
+
 	_, err = file.Write([]byte(fileInfo))
 	if err != nil {
 		return err

@@ -1,12 +1,10 @@
 package model
 
-import "errors"
-
 type Uuid string
 
 func NewUuid(uuid string) (Uuid, error) {
 	if len(uuid) == 0 || len(uuid) >= 37 {
-		return "", errors.New("invalid Domain UUID is specified")
+		return "", NewInvalidParameterGiven("invalid Domain UUID is specified. uuid: " + uuid)
 	}
 
 	domainUuid := (Uuid)(uuid)

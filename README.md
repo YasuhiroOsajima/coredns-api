@@ -221,5 +221,5 @@ Content-Type: application/json
 ```
 
 ## Todo
-- Update CoreDNS conf by REST API to add and remove domains.
 - Use goroutine to update filesystem sequentially.
+- Database setup from CoreDNS config.

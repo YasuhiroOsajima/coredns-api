@@ -7,8 +7,8 @@ import (
 )
 
 type HostInteractor struct {
-	FsRepository IFilesystemRepository
-	DbRepository IDatabaseRepository
+	fsRepository IFilesystemRepository
+	dbRepository IDatabaseRepository
 }
 
 func NewHostInteractor(fRepo IFilesystemRepository, dRepo IDatabaseRepository) *HostInteractor {
@@ -16,6 +16,9 @@ func NewHostInteractor(fRepo IFilesystemRepository, dRepo IDatabaseRepository) *
 }
 
 func (i *HostInteractor) Add(newHost *model.Host, domainUuid model.Uuid) (*model.Domain, error) {
+	i.fsRepository.Lock()
+	defer i.fsRepository.UnLock()
+
 	gotDomain, err := i.GetDomain(domainUuid)
 	if err != nil {
 		return nil, err
@@ -33,7 +36,7 @@ func (i *HostInteractor) Add(newHost *model.Host, domainUuid model.Uuid) (*model
 	hosts := append(gotDomain.Hosts, newHost)
 	gotDomain.Hosts = hosts
 
-	err = i.FsRepository.WriteDomainFile(gotDomain)
+	err = i.fsRepository.WriteDomainFile(gotDomain)
 	if err != nil {
 		return nil, err
 	}
@@ -42,6 +45,9 @@ func (i *HostInteractor) Add(newHost *model.Host, domainUuid model.Uuid) (*model
 }
 
 func (i *HostInteractor) Get(hostUuid, domainUuid model.Uuid) (*model.Host, error) {
+	i.fsRepository.Lock()
+	defer i.fsRepository.UnLock()
+
 	domain, err := i.GetDomain(domainUuid)
 	if err != nil {
 		return nil, err
@@ -57,12 +63,15 @@ func (i *HostInteractor) Get(hostUuid, domainUuid model.Uuid) (*model.Host, erro
 }
 
 func (i *HostInteractor) GetDomain(domainUuid model.Uuid) (*model.Domain, error) {
-	targetDomain, err := i.DbRepository.GetDomain(domainUuid)
+	i.fsRepository.Lock()
+	defer i.fsRepository.UnLock()
+
+	targetDomain, err := i.dbRepository.GetDomain(domainUuid)
 	if err != nil {
 		return nil, err
 	}
 
-	gotDomain, err := i.FsRepository.LoadDomainFile(targetDomain.Name)
+	gotDomain, err := i.fsRepository.LoadDomainFile(targetDomain.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -71,6 +80,9 @@ func (i *HostInteractor) GetDomain(domainUuid model.Uuid) (*model.Domain, error)
 }
 
 func (i *HostInteractor) Update(newHost *model.Host, domainUuid model.Uuid) error {
+	i.fsRepository.Lock()
+	defer i.fsRepository.UnLock()
+
 	domain, err := i.GetDomain(domainUuid)
 	if err != nil {
 		return err
@@ -85,10 +97,13 @@ func (i *HostInteractor) Update(newHost *model.Host, domainUuid model.Uuid) erro
 		}
 	}
 	domain.Hosts = newHosts
-	return i.FsRepository.WriteDomainFile(domain)
+	return i.fsRepository.WriteDomainFile(domain)
 }
 
 func (i *HostInteractor) Delete(host *model.Host, domainUuid model.Uuid) error {
+	i.fsRepository.Lock()
+	defer i.fsRepository.UnLock()
+
 	domain, err := i.GetDomain(domainUuid)
 	if err != nil {
 		return err
@@ -101,5 +116,5 @@ func (i *HostInteractor) Delete(host *model.Host, domainUuid model.Uuid) error {
 		}
 	}
 	domain.Hosts = newHosts
-	return i.FsRepository.WriteDomainFile(domain)
+	return i.fsRepository.WriteDomainFile(domain)
 }

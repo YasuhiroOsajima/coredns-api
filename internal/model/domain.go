@@ -2,11 +2,11 @@ package model
 
 import (
 	"bytes"
-	"errors"
-	"github.com/google/uuid"
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/google/uuid"
 )
 
 type Domain struct {
@@ -96,7 +96,7 @@ func NewDomain(name, fileInfo string) (*Domain, error) {
 	}
 
 	if domain == nil {
-		return nil, errors.New("domainUUID is not in hosts file")
+		return nil, NewServerSideError("domainUUID is not in hosts file info for " + name)
 	}
 
 	domain.Hosts = hosts

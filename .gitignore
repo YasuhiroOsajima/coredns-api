@@ -6,7 +6,9 @@
 go.sum
 go.sum*tmp
 
-work/coredns-api.db
-
 main
 coredns-api
+
+build/coredns-api
+work/coredns-api.db
+
