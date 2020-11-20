@@ -27,7 +27,7 @@ func NewFileRepository(fs IFilesystem) usecase.IFilesystemRepository {
 
 func (f *FilesystemRepository) WriteConfCache() error {
 	if !coreDNSConfCache.IsLocked() {
-		return usecase.NewIsNotLocked()
+		return usecase.NewIsNotLockedError()
 	}
 
 	confPath := coreDNSConfCache.ConfPath
@@ -42,7 +42,7 @@ func (f *FilesystemRepository) WriteConfCache() error {
 
 func (f *FilesystemRepository) WriteDomainFile(domain *model.Domain) error {
 	if !coreDNSConfCache.IsLocked() {
-		return usecase.NewIsNotLocked()
+		return usecase.NewIsNotLockedError()
 	}
 
 	name := domain.Name
@@ -64,7 +64,7 @@ func (f *FilesystemRepository) WriteDomainFile(domain *model.Domain) error {
 
 func (f *FilesystemRepository) LoadDomainFile(domainName model.DomainName) (*model.Domain, error) {
 	if !coreDNSConfCache.IsLocked() {
-		return nil, usecase.NewIsNotLocked()
+		return nil, usecase.NewIsNotLockedError()
 	}
 
 	domain, err := coreDNSConfCache.Get(domainName)
@@ -89,7 +89,7 @@ func (f *FilesystemRepository) LoadDomainFile(domainName model.DomainName) (*mod
 
 func (f *FilesystemRepository) loadAllDomainFiles() ([]*model.Domain, error) {
 	if !coreDNSConfCache.IsLocked() {
-		return nil, usecase.NewIsNotLocked()
+		return nil, usecase.NewIsNotLockedError()
 	}
 
 	domainFileDir := model.GetHostsDir()
@@ -121,7 +121,7 @@ func (f *FilesystemRepository) loadAllDomainFiles() ([]*model.Domain, error) {
 
 func (f *FilesystemRepository) DeleteDomainFile(domain *model.Domain) error {
 	if !coreDNSConfCache.IsLocked() {
-		return usecase.NewIsNotLocked()
+		return usecase.NewIsNotLockedError()
 	}
 
 	err := f.filesystem.DeleteFile(domain.Name.String())

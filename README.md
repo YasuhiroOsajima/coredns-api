@@ -5,7 +5,11 @@
 build
 
 ```bash
+cd coredns-api/
+
 bash scripts/code_build.sh 
+or
+bash script/docker_build.sh
 ```
 
 Depending OS environment variables:
@@ -19,12 +23,12 @@ Depending OS environment variables:
   Directory path of coredns hosts files.
 - DB_PATH  
   File path of SQLite3 database.
-  
-## Doc
-
-Swagger is available on `http://${SERVER}:${PORT}/swagger/index.html`.
 
 ## Usage
+
+## API doc
+
+Swagger is available on `http://${SERVER}:${PORT}/swagger/index.html`.
 
 ### Add domain
 

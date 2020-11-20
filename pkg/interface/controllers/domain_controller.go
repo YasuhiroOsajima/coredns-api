@@ -158,9 +158,17 @@ func (d *DomainController) Get(c Context) {
 
 	gotDomain, err := d.interactor.Get(targetDomainUuid)
 	if err != nil {
-		NewError(c,
-			http.StatusInternalServerError,
-			NewUnAvailableHandlingError())
+		switch e := err.(type) {
+		case *model.InvalidParameterGiven:
+			NewError(c, http.StatusBadRequest, err)
+		case *usecase.RecordNotFoundError:
+			NewError(c, http.StatusNotFound, err)
+		default:
+			NewError(c,
+				http.StatusInternalServerError,
+				NewUnAvailableHandlingError())
+			log.Fatal(e)
+		}
 		log.Fatal(err)
 		return
 	}
@@ -198,9 +206,17 @@ func (d *DomainController) Delete(c Context) {
 
 	err = d.interactor.Delete(targetDomainUuid)
 	if err != nil {
-		NewError(c,
-			http.StatusInternalServerError,
-			NewUnAvailableHandlingError())
+		switch e := err.(type) {
+		case *model.InvalidParameterGiven:
+			NewError(c, http.StatusBadRequest, err)
+		case *usecase.RecordNotFoundError:
+			NewError(c, http.StatusNotFound, err)
+		default:
+			NewError(c,
+				http.StatusInternalServerError,
+				NewUnAvailableHandlingError())
+			log.Fatal(e)
+		}
 		log.Fatal(err)
 		return
 	}

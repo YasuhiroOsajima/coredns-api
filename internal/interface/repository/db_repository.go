@@ -5,6 +5,8 @@ import (
 	"coredns_api/internal/usecase"
 )
 
+const GormNotFound = "record not found"
+
 type DatabaseRepository struct {
 	db IDatabase
 }
@@ -16,6 +18,9 @@ func NewDatabaseRepository(db IDatabase) usecase.IDatabaseRepository {
 func (d *DatabaseRepository) GetDomain(uuid model.Uuid) (*model.Domain, error) {
 	domainResult, err := d.db.SelectDomain(uuid.String())
 	if err != nil {
+		if err.Error() == GormNotFound {
+			return nil, usecase.NewRecordNotFoundError()
+		}
 		return nil, err
 	}
 
@@ -58,5 +63,10 @@ func (d *DatabaseRepository) AddDomain(domain *model.Domain) error {
 
 func (d *DatabaseRepository) DeleteDomain(domain *model.Domain) error {
 	uuid := domain.Uuid
-	return d.db.DeleteDomain(uuid.String())
+	err := d.db.DeleteDomain(uuid.String())
+	if err != nil && err.Error() == GormNotFound {
+		return usecase.NewRecordNotFoundError()
+	}
+
+	return err
 }

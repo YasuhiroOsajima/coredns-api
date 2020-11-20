@@ -72,9 +72,17 @@ func (d *HostController) Add(c Context) {
 
 	gotDomain, err := d.Interactor.Add(newHost, targetDomainUuid)
 	if err != nil {
-		NewError(c,
-			http.StatusInternalServerError,
-			NewUnAvailableHandlingError())
+		switch e := err.(type) {
+		case *usecase.HostDuplicatedError:
+			NewError(c, http.StatusBadRequest, err)
+		case *usecase.RecordNotFoundError:
+			NewError(c, http.StatusNotFound, err)
+		default:
+			NewError(c,
+				http.StatusInternalServerError,
+				NewUnAvailableHandlingError())
+			log.Fatal(e)
+		}
 		log.Fatal(err)
 		return
 	}
@@ -122,9 +130,15 @@ func (d *HostController) Update(c Context) {
 
 	host, err := d.Interactor.Get(targetHostUuid, targetDomainUuid)
 	if err != nil {
-		NewError(c,
-			http.StatusInternalServerError,
-			NewUnAvailableHandlingError())
+		switch e := err.(type) {
+		case *usecase.RecordNotFoundError, *usecase.HostNotFoundError:
+			NewError(c, http.StatusNotFound, err)
+		default:
+			NewError(c,
+				http.StatusInternalServerError,
+				NewUnAvailableHandlingError())
+			log.Fatal(e)
+		}
 		log.Fatal(err)
 		return
 	}
@@ -162,14 +176,27 @@ func (d *HostController) Update(c Context) {
 
 	err = d.Interactor.Update(updatedHost, targetDomainUuid)
 	if err != nil {
+		switch e := err.(type) {
+		case *usecase.RecordNotFoundError, *usecase.HostNotFoundError:
+			NewError(c, http.StatusNotFound, err)
+		default:
+			NewError(c,
+				http.StatusInternalServerError,
+				NewUnAvailableHandlingError())
+			log.Fatal(e)
+		}
+		log.Fatal(err)
+		return
+	}
+
+	domain, err := d.Interactor.GetDomain(targetDomainUuid)
+	if err != nil {
 		NewError(c,
 			http.StatusInternalServerError,
 			NewUnAvailableHandlingError())
 		log.Fatal(err)
 		return
 	}
-
-	domain, _ := d.Interactor.GetDomain(targetDomainUuid)
 
 	var hosts []HostResult
 	hostRes := HostResult{Name: updatedHost.Name, Address: updatedHost.Address, Uuid: updatedHost.Uuid.String()}
@@ -211,9 +238,15 @@ func (d *HostController) Get(c Context) {
 
 	host, err := d.Interactor.Get(targetHostUuid, targetDomainUuid)
 	if err != nil {
-		NewError(c,
-			http.StatusInternalServerError,
-			NewUnAvailableHandlingError())
+		switch e := err.(type) {
+		case *usecase.RecordNotFoundError, *usecase.HostNotFoundError:
+			NewError(c, http.StatusNotFound, err)
+		default:
+			NewError(c,
+				http.StatusInternalServerError,
+				NewUnAvailableHandlingError())
+			log.Fatal(e)
+		}
 		log.Fatal(err)
 		return
 	}
@@ -266,18 +299,30 @@ func (d *HostController) Delete(c Context) {
 
 	host, err := d.Interactor.Get(targetHostUuid, targetDomainUuid)
 	if err != nil {
-		NewError(c,
-			http.StatusInternalServerError,
-			NewUnAvailableHandlingError())
+		switch e := err.(type) {
+		case *usecase.RecordNotFoundError, *usecase.HostNotFoundError:
+			NewError(c, http.StatusNotFound, err)
+		default:
+			NewError(c,
+				http.StatusInternalServerError,
+				NewUnAvailableHandlingError())
+			log.Fatal(e)
+		}
 		log.Fatal(err)
 		return
 	}
 
 	err = d.Interactor.Delete(host, targetDomainUuid)
 	if err != nil {
-		NewError(c,
-			http.StatusInternalServerError,
-			NewUnAvailableHandlingError())
+		switch e := err.(type) {
+		case *usecase.RecordNotFoundError, *usecase.HostNotFoundError:
+			NewError(c, http.StatusNotFound, err)
+		default:
+			NewError(c,
+				http.StatusInternalServerError,
+				NewUnAvailableHandlingError())
+			log.Fatal(e)
+		}
 		log.Fatal(err)
 		return
 	}

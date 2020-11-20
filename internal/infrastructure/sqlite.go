@@ -2,6 +2,7 @@ package infrastructure
 
 import (
 	"coredns_api/internal/interface/repository"
+	"errors"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"os"
@@ -71,6 +72,10 @@ func (s *SQLite) InsertDomain(uuid, name string) error {
 
 func (s *SQLite) DeleteDomain(uuid string) error {
 	result := s.db.Delete(&Domain{}, "uuid = ?", uuid)
+	if result.RowsAffected == 0 {
+		return errors.New(repository.GormNotFound)
+	}
+
 	if result.Error != nil {
 		return result.Error
 	}
