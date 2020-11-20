@@ -79,7 +79,8 @@ func NewDomain(name, fileInfo string) (*Domain, error) {
 			if err != nil {
 				return nil, err
 			}
-		} else if strings.Contains(commentInfo, "-") && strings.Contains(commentInfo, ".") && strings.Contains(commentInfo, "#") {
+		} else if strings.Contains(line, "-") && strings.Contains(line, ".") && strings.Contains(line, "#") {
+
 			hostId := splitComment[0]
 			splitHost := strings.Fields(hostInfo)
 			address := splitHost[0]

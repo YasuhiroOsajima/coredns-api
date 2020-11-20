@@ -1,11 +1,14 @@
 package infrastructure
 
 import (
-	"coredns_api/internal/interface/repository"
 	"errors"
+	"os"
+	"time"
+
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"os"
+
+	"coredns_api/internal/interface/repository"
 )
 
 type Domain struct {
@@ -20,6 +23,15 @@ type SQLite struct {
 
 func NewSQLite() repository.IDatabase {
 	dbPath := os.Getenv("DB_PATH")
+
+	_, err := os.Stat(dbPath)
+	if err == nil {
+		now := time.Now().Format("2006_0102_150405")
+		err := os.Rename(dbPath, dbPath+"_"+now)
+		if err != nil {
+			panic(err)
+		}
+	}
 
 	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	if err != nil {

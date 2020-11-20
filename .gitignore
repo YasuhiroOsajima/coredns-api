@@ -10,5 +10,5 @@ main
 coredns-api
 
 build/coredns-api
-work/coredns-api.db
+work/*
 

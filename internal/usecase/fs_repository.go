@@ -6,6 +6,7 @@ type IFilesystemRepository interface {
 	WriteConfCache() error
 	WriteDomainFile(domain *model.Domain) error
 	LoadDomainFile(domainName model.DomainName) (*model.Domain, error)
+	LoadAllDomains() ([]*model.Domain, error)
 	DeleteDomainFile(domain *model.Domain) error
 	Lock()
 	UnLock()

@@ -71,6 +71,14 @@ func (d *CoreDNSConf) Get(domainName DomainName) (*Domain, error) {
 	return domain, nil
 }
 
+func (d *CoreDNSConf) GetAll() []*Domain {
+	var domains []*Domain
+	for _, v := range d.Cache {
+		domains = append(domains, v)
+	}
+	return domains
+}
+
 func (d *CoreDNSConf) Delete(domain *Domain) {
 	delete(d.Cache, domain.Name)
 }

@@ -10,7 +10,24 @@ type DomainInteractor struct {
 }
 
 func NewDomainInteractor(fRepo IFilesystemRepository, dRepo IDatabaseRepository) *DomainInteractor {
-	return &DomainInteractor{fsRepository: fRepo, dbRepository: dRepo}
+	d := &DomainInteractor{fsRepository: fRepo, dbRepository: dRepo}
+
+	d.fsRepository.Lock()
+	defer d.fsRepository.UnLock()
+
+	allDomainInfo, err := d.fsRepository.LoadAllDomains()
+	if err != nil {
+		panic(err)
+	}
+
+	for _, dom := range allDomainInfo {
+		err = d.dbRepository.AddDomain(dom)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return d
 }
 
 func (i *DomainInteractor) Add(domain *model.Domain) error {

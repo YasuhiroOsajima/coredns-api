@@ -118,6 +118,7 @@ func (f *FilesystemRepository) loadAllDomainFiles() ([]*model.Domain, error) {
 
 		filePath := model.GetHostsFilePath(domainName)
 		domain, err := f.loadDomainFileInitial(domainName, filePath)
+
 		if err != nil {
 			log.Print(domainFile)
 			log.Print(err)
@@ -127,6 +128,13 @@ func (f *FilesystemRepository) loadAllDomainFiles() ([]*model.Domain, error) {
 		domainList = append(domainList, domain)
 	}
 	return domainList, nil
+}
+
+func (f *FilesystemRepository) LoadAllDomains() ([]*model.Domain, error) {
+	if !coreDNSConfCache.IsLocked() {
+		return nil, usecase.NewIsNotLockedError()
+	}
+	return coreDNSConfCache.GetAll(), nil
 }
 
 func (f *FilesystemRepository) DeleteDomainFile(domain *model.Domain) error {
