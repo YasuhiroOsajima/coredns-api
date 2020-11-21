@@ -21,7 +21,7 @@ services:
       - ./coredns_conf/:/var/lib/coredns
       - ./work/:/var/lib/coredns-api
     environment:
-      - SERVER=172.28.21.40
+      - SERVER=127.0.0.1
       - PORT=8080
       - CONF_PATH=/var/lib/coredns/coredns.conf
       - HOSTS_DIR=/var/lib/coredns/hosts/

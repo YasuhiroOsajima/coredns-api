@@ -1,7 +1,7 @@
 #!/bin/sh
 
 PWD=$(pwd)
-export SERVER=172.28.21.40
+export SERVER=127.0.0.1
 export PORT=8080
 export CONF_PATH=${PWD}/coredns_conf/coredns.conf
 export HOSTS_DIR=${PWD}/coredns_conf/hosts/

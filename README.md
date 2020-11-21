@@ -34,16 +34,16 @@ docker-compose up
 
 ## Usage
 
-## API doc
+### API doc
 
 Swagger is available on `http://${SERVER}:${PORT}/swagger/index.html`.
 
-### Add domain
+#### Add domain
 
 request
 
 ```bash
-curl -X POST http://127.0.0.1/v1/domains \
+curl -X POST http://127.0.0.1:8080/v1/domains \
 -H "Accept: application/json" \
 -d '{"domain": "hogehoge.hoge"}'
 ```
@@ -57,12 +57,12 @@ Content-Type: application/json
 {"domain": "hogehoge.hoge", "uuid": "aea6cf49-2912-42af-b903-dae1312f64d9"}
 ```
 
-### Delete domain
+#### Delete domain
 
 request
 
 ```bash
-curl -X DELETE http://127.0.0.1/v1/domains/{DMAIN_UUID}
+curl -X DELETE http://127.0.0.1:8080/v1/domains/{DMAIN_UUID}
 ```
 
 response
@@ -72,12 +72,12 @@ HTTP/1.1 204 No Content
 Content-Length: 0
 ```
 
-### List domains
+#### List domains
 
 request
 
 ```bash
-curl -X GET http://127.0.0.1/v1/domains
+curl -X GET http://127.0.0.1:8080/v1/domains
 ```
 
 response
@@ -94,12 +94,12 @@ Content-Type: application/json
 }
 ```
 
-### Get domain
+#### Get domain
 
 request
 
 ```bash
-curl -X GET http://127.0.0.1/v1/domains/{DOMAIN_UUID}
+curl -X GET http://127.0.0.1:8080/v1/domains/{DOMAIN_UUID}
 ```
 
 response
@@ -122,12 +122,12 @@ Content-Type: application/json
 ```
 
 
-### Add host
+#### Add host
 
 request
 
 ```bash
-curl -X POST http://127.0.0.1/v1/domains/{DOMAIN_UUID}/hosts \
+curl -X POST http://127.0.0.1:8080/v1/domains/{DOMAIN_UUID}/hosts \
 -H "Accept: application/json" \
 -d '{"hostname": "hogeserver1", "address": "172.21.1.1"}'
 ```
@@ -148,12 +148,12 @@ Content-Type: application/json
 }
 ```
 
-### Update host
+#### Update host
 
 request
 
 ```bash
-curl -X PATCH http://127.0.0.1/v1/domains/{DOMAIN_UUID}/hosts/{HOST_UUID} \
+curl -X PATCH http://127.0.0.1:8080/v1/domains/{DOMAIN_UUID}/hosts/{HOST_UUID} \
 -H "Accept: application/json" \
 -d '{"hostname": "hogeserver2"}'
 ```
@@ -161,7 +161,7 @@ curl -X PATCH http://127.0.0.1/v1/domains/{DOMAIN_UUID}/hosts/{HOST_UUID} \
 or
 
 ```bash
-curl -X PATCH http://127.0.0.1/v1/domains/{DOMAIN_UUID}/hosts/{HOST_UUID} \
+curl -X PATCH http://127.0.0.1:8080/v1/domains/{DOMAIN_UUID}/hosts/{HOST_UUID} \
 -H "Accept: application/json" \
 -d '{"address": "172.21.1.2"}'
 ```
@@ -169,7 +169,7 @@ curl -X PATCH http://127.0.0.1/v1/domains/{DOMAIN_UUID}/hosts/{HOST_UUID} \
 or
 
 ```bash
-curl -X PATCH http://127.0.0.1/v1/domains/{DOMAIN_UUID}/hosts/{HOST_UUID} \
+curl -X PATCH http://127.0.0.1:8080/v1/domains/{DOMAIN_UUID}/hosts/{HOST_UUID} \
 -H "Accept: application/json" \
 -d '{"hostname": "hogeserver2", "address": "172.21.1.2"}'
 ```
@@ -190,12 +190,12 @@ Content-Type: application/json
 }
 ```
 
-### Delete host
+#### Delete host
 
 request
 
 ```bash
-curl -X DELETE http://127.0.0.1/v1/domains/{DOMAIN_UUID}/hosts/{HOST_UUID}
+curl -X DELETE http://127.0.0.1:8080/v1/domains/{DOMAIN_UUID}/hosts/{HOST_UUID}
 ```
 
 response
@@ -205,12 +205,12 @@ HTTP/1.1 204 No Content
 Content-Length: 0
 ```
 
-### Get host
+#### Get host
 
 request
 
 ```bash
-curl -X GET http://127.0.0.1/v1/domains/{DOMAIN_UUID}/hosts/{HOST_UUID}
+curl -X GET http://127.0.0.1:8080/v1/domains/{DOMAIN_UUID}/hosts/{HOST_UUID}
 ```
 
 response
@@ -230,6 +230,12 @@ Content-Type: application/json
         }
     ]
 }
+```
+
+### DNS query
+
+```bash
+dig @127.0.0.1 hogeserver1.hogehoge.hoge
 ```
 
 ## Todo
