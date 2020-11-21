@@ -31,7 +31,8 @@ func TestCoreDNSConf(t *testing.T) {
 
 . {
     forward . 8.8.8.8
-}`
+}
+`
 
 	fmt.Print(confInfo)
 	if confInfo != expect {
