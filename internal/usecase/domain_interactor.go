@@ -7,7 +7,9 @@ type DomainInteractor struct {
 }
 
 func NewDomainInteractor(fRepo IFilesystemRepository) *DomainInteractor {
-	return &DomainInteractor{fsRepository: fRepo}
+	r := &DomainInteractor{fsRepository: fRepo}
+	r.fsRepository.Initialize()
+	return r
 }
 
 func (i *DomainInteractor) Add(domain *model.Domain) error {

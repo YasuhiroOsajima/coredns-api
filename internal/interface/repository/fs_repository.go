@@ -14,15 +14,24 @@ type FilesystemRepository struct {
 }
 
 func NewFileRepository(fs IFilesystem) usecase.IFilesystemRepository {
-	f := &FilesystemRepository{fs}
+	return &FilesystemRepository{fs}
+}
 
+func (f *FilesystemRepository) Initialize() {
 	allDomainInfo, err := f.loadAllDomainFiles()
 	if err != nil {
 		panic(err)
 	}
 
 	coreDNSConfCache = model.NewCoreDNSConf(allDomainInfo)
-	return f
+}
+
+func (f *FilesystemRepository) Lock() {
+	coreDNSConfCache.SetLocke()
+}
+
+func (f *FilesystemRepository) UnLock() {
+	coreDNSConfCache.UnSetLocke()
 }
 
 func (f *FilesystemRepository) WriteConfCache() error {
@@ -58,6 +67,37 @@ func (f *FilesystemRepository) WriteDomainFile(domain *model.Domain) error {
 	}
 
 	coreDNSConfCache.Add(domain)
+	return nil
+}
+
+func (f *FilesystemRepository) LoadAllDomains() ([]*model.Domain, error) {
+	if !coreDNSConfCache.IsLocked() {
+		return nil, usecase.NewIsNotLockedError()
+	}
+	return coreDNSConfCache.GetAll(), nil
+}
+
+func (f *FilesystemRepository) GetDomainByUuid(domainUuid model.Uuid) (*model.Domain, error) {
+	if !coreDNSConfCache.IsLocked() {
+		return nil, usecase.NewIsNotLockedError()
+	}
+
+	return coreDNSConfCache.GetByUuid(domainUuid)
+}
+
+func (f *FilesystemRepository) DeleteDomainFile(domain *model.Domain) error {
+	if !coreDNSConfCache.IsLocked() {
+		return usecase.NewIsNotLockedError()
+	}
+
+	domainInfoFilePath := model.GetHostsFilePath(domain.Name)
+	err := f.filesystem.DeleteFile(domainInfoFilePath)
+	if err != nil {
+		return err
+	}
+
+	coreDNSConfCache.Delete(domain)
+
 	return nil
 }
 
@@ -103,43 +143,4 @@ func (f *FilesystemRepository) loadAllDomainFiles() ([]*model.Domain, error) {
 		domainList = append(domainList, domain)
 	}
 	return domainList, nil
-}
-
-func (f *FilesystemRepository) LoadAllDomains() ([]*model.Domain, error) {
-	if !coreDNSConfCache.IsLocked() {
-		return nil, usecase.NewIsNotLockedError()
-	}
-	return coreDNSConfCache.GetAll(), nil
-}
-
-func (f *FilesystemRepository) GetDomainByUuid(domainUuid model.Uuid) (*model.Domain, error) {
-	if !coreDNSConfCache.IsLocked() {
-		return nil, usecase.NewIsNotLockedError()
-	}
-
-	return coreDNSConfCache.GetByUuid(domainUuid)
-}
-
-func (f *FilesystemRepository) DeleteDomainFile(domain *model.Domain) error {
-	if !coreDNSConfCache.IsLocked() {
-		return usecase.NewIsNotLockedError()
-	}
-
-	domainInfoFilePath := model.GetHostsFilePath(domain.Name)
-	err := f.filesystem.DeleteFile(domainInfoFilePath)
-	if err != nil {
-		return err
-	}
-
-	coreDNSConfCache.Delete(domain)
-
-	return nil
-}
-
-func (f *FilesystemRepository) Lock() {
-	coreDNSConfCache.SetLocke()
-}
-
-func (f *FilesystemRepository) UnLock() {
-	coreDNSConfCache.UnSetLocke()
 }
