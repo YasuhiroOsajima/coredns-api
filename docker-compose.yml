@@ -19,7 +19,6 @@ services:
       - "8080:8080/tcp"
     volumes:
       - ./coredns_conf/:/var/lib/coredns
-      - ./work/:/var/lib/coredns-api
     environment:
       - SERVER=127.0.0.1
       - PORT=8080
