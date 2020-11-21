@@ -14,7 +14,7 @@ type HostRequest struct {
 }
 
 type HostController struct {
-	Interactor *usecase.HostInteractor
+	interactor *usecase.HostInteractor
 }
 
 func NewHostController(itr *usecase.HostInteractor) *HostController {
@@ -29,7 +29,7 @@ func NewHostController(itr *usecase.HostInteractor) *HostController {
 // @Produce json
 // @Param domain_uuid path string true "Target domain's UUID"
 // @Param host body HostRequest true "Request body parameter with json format"
-// @Success 201 {object} AddResult
+// @Success 201 {object} DomainInfoResult
 // @Failure 400 {object} HTTPError
 // @Failure 404 {object} HTTPError
 // @Failure 500 {object} HTTPError
@@ -70,7 +70,7 @@ func (d *HostController) Add(c Context) {
 		return
 	}
 
-	gotDomain, err := d.Interactor.Add(newHost, targetDomainUuid)
+	gotDomain, err := d.interactor.Add(newHost, targetDomainUuid)
 	if err != nil {
 		switch e := err.(type) {
 		case *usecase.HostDuplicatedError:
@@ -91,11 +91,61 @@ func (d *HostController) Add(c Context) {
 	hostRes := HostResult{Name: newHost.Name, Address: newHost.Address, Uuid: newHost.Uuid.String()}
 	hosts = append(hosts, hostRes)
 
-	var result AddResult
+	var result DomainInfoResult
 	result.Domain = gotDomain.Name.String()
 	result.Uuid = gotDomain.Uuid.String()
 	result.Hosts = hosts
 	c.JSON(http.StatusCreated, result)
+}
+
+// List handler doc
+// @Tags Host
+// @Summary List hosts
+// @Description List hosts from domain
+// @Produce json
+// @Param domain_uuid path string true "Target domain's UUID"
+// @Success 200 {object} DomainInfoResult
+// @Failure 400 {object} HTTPError
+// @Failure 404 {object} HTTPError
+// @Failure 500 {object} HTTPError
+// @Router /v1/domains/{domain_uuid}/hosts [get]
+func (d *HostController) List(c Context) {
+	domainUuid := c.Param("domain_uuid")
+	targetDomainUuid, err := model.NewUuid(domainUuid)
+	if err != nil {
+		NewError(c, http.StatusBadRequest, err)
+		log.Print(err)
+		return
+	}
+
+	gotDomain, err := d.interactor.GetDomain(targetDomainUuid)
+	if err != nil {
+		switch e := err.(type) {
+		case *model.InvalidParameterGiven:
+			NewError(c, http.StatusBadRequest, err)
+		case *model.DomainNotFoundError:
+			NewError(c, http.StatusNotFound, err)
+		default:
+			NewError(c,
+				http.StatusInternalServerError,
+				NewUnAvailableHandlingError())
+			log.Print(e)
+		}
+		log.Print(err)
+		return
+	}
+
+	var hosts []HostResult
+	for _, h := range gotDomain.Hosts {
+		host := HostResult{Name: h.Name, Address: h.Address, Uuid: h.Uuid.String()}
+		hosts = append(hosts, host)
+	}
+
+	var result DomainInfoResult
+	result.Domain = gotDomain.Name.String()
+	result.Uuid = gotDomain.Uuid.String()
+	result.Hosts = hosts
+	c.JSON(http.StatusOK, result)
 }
 
 // Update handler doc
@@ -106,7 +156,7 @@ func (d *HostController) Add(c Context) {
 // @Produce json
 // @Param domain_uuid path string true "Target domain's UUID"
 // @Param host body HostRequest true "Request body parameter with json format"
-// @Success 204 {object} AddResult
+// @Success 204 {object} DomainInfoResult
 // @Failure 400 {object} HTTPError
 // @Failure 404 {object} HTTPError
 // @Failure 500 {object} HTTPError
@@ -128,7 +178,7 @@ func (d *HostController) Update(c Context) {
 		return
 	}
 
-	host, err := d.Interactor.Get(targetHostUuid, targetDomainUuid)
+	host, err := d.interactor.Get(targetHostUuid, targetDomainUuid)
 	if err != nil {
 		switch e := err.(type) {
 		case *model.HostNotFoundError, *model.DomainNotFoundError:
@@ -174,7 +224,7 @@ func (d *HostController) Update(c Context) {
 		return
 	}
 
-	err = d.Interactor.Update(updatedHost, targetDomainUuid)
+	err = d.interactor.Update(updatedHost, targetDomainUuid)
 	if err != nil {
 		switch e := err.(type) {
 		case *model.HostNotFoundError, *model.DomainNotFoundError:
@@ -189,7 +239,7 @@ func (d *HostController) Update(c Context) {
 		return
 	}
 
-	domain, err := d.Interactor.GetDomain(targetDomainUuid)
+	domain, err := d.interactor.GetDomain(targetDomainUuid)
 	if err != nil {
 		switch e := err.(type) {
 		case *model.DomainNotFoundError:
@@ -208,7 +258,7 @@ func (d *HostController) Update(c Context) {
 	hostRes := HostResult{Name: updatedHost.Name, Address: updatedHost.Address, Uuid: updatedHost.Uuid.String()}
 	hosts = append(hosts, hostRes)
 
-	var result AddResult
+	var result DomainInfoResult
 	result.Domain = domain.Name.String()
 	result.Uuid = domain.Uuid.String()
 	result.Hosts = hosts
@@ -222,7 +272,7 @@ func (d *HostController) Update(c Context) {
 // @Produce json
 // @Param domain_uuid path string true "Target domain's UUID"
 // @Param host_uuid path string true "Target host's UUID"
-// @Success 200 {object} AddResult
+// @Success 200 {object} DomainInfoResult
 // @Failure 400 {object} HTTPError
 // @Failure 404 {object} HTTPError
 // @Router /v1/domains/{domain_uuid}/hosts/{host_uuid} [get]
@@ -243,7 +293,7 @@ func (d *HostController) Get(c Context) {
 		return
 	}
 
-	host, err := d.Interactor.Get(targetHostUuid, targetDomainUuid)
+	host, err := d.interactor.Get(targetHostUuid, targetDomainUuid)
 	if err != nil {
 		switch e := err.(type) {
 		case *model.HostNotFoundError, *model.DomainNotFoundError:
@@ -258,7 +308,7 @@ func (d *HostController) Get(c Context) {
 		return
 	}
 
-	domain, err := d.Interactor.GetDomain(targetDomainUuid)
+	domain, err := d.interactor.GetDomain(targetDomainUuid)
 	if err != nil {
 		switch e := err.(type) {
 		case *model.DomainNotFoundError:
@@ -277,7 +327,7 @@ func (d *HostController) Get(c Context) {
 	hostRes := HostResult{Name: host.Name, Address: host.Address, Uuid: host.Uuid.String()}
 	hosts = append(hosts, hostRes)
 
-	var result AddResult
+	var result DomainInfoResult
 	result.Domain = domain.Name.String()
 	result.Uuid = domain.Uuid.String()
 	result.Hosts = hosts
@@ -290,7 +340,7 @@ func (d *HostController) Get(c Context) {
 // @Description Delete host info
 // @Param domain_uuid path string true "Target domain's UUID"
 // @Param host_uuid path string true "Target host's UUID"
-// @Success 204 {object} AddResult
+// @Success 204 {object} DomainInfoResult
 // @Failure 400 {object} HTTPError
 // @Failure 404 {object} HTTPError
 // @Router /v1/domains/{domain_uuid}/hosts/{host_uuid} [delete]
@@ -311,7 +361,7 @@ func (d *HostController) Delete(c Context) {
 		return
 	}
 
-	host, err := d.Interactor.Get(targetHostUuid, targetDomainUuid)
+	host, err := d.interactor.Get(targetHostUuid, targetDomainUuid)
 	if err != nil {
 		switch e := err.(type) {
 		case *model.HostNotFoundError:
@@ -326,7 +376,7 @@ func (d *HostController) Delete(c Context) {
 		return
 	}
 
-	err = d.Interactor.Delete(host, targetDomainUuid)
+	err = d.interactor.Delete(host, targetDomainUuid)
 	if err != nil {
 		switch e := err.(type) {
 		case *model.HostNotFoundError, *model.DomainNotFoundError:

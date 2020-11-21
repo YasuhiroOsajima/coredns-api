@@ -1,6 +1,6 @@
 basePath: /v1
 definitions:
-  controllers.AddResult:
+  controllers.DomainInfoResult:
     properties:
       domain:
         type: string
@@ -71,7 +71,7 @@ info:
 paths:
   /v1/domains:
     get:
-      description: List domains on coredns
+      description: List domains from coredns
       produces:
       - application/json
       responses:
@@ -103,7 +103,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/controllers.AddResult'
+            $ref: '#/definitions/controllers.DomainInfoResult'
         "400":
           description: Bad Request
           schema:
@@ -139,11 +139,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/controllers.HTTPError'
-      summary: Delete new domain
+      summary: Delete domain
       tags:
       - Domain
     get:
-      description: Get new domain to coredns
+      description: Get domain from coredns
       parameters:
       - description: Target domain's UUID
         in: path
@@ -156,7 +156,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/controllers.AddResult'
+            $ref: '#/definitions/controllers.DomainInfoResult'
         "400":
           description: Bad Request
           schema:
@@ -169,10 +169,40 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/controllers.HTTPError'
-      summary: Get new domain
+      summary: Get domain
       tags:
       - Domain
   /v1/domains/{domain_uuid}/hosts:
+    get:
+      description: List hosts from domain
+      parameters:
+      - description: Target domain's UUID
+        in: path
+        name: domain_uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.DomainInfoResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+      summary: List hosts
+      tags:
+      - Host
     patch:
       consumes:
       - application/json
@@ -195,7 +225,7 @@ paths:
         "204":
           description: No Content
           schema:
-            $ref: '#/definitions/controllers.AddResult'
+            $ref: '#/definitions/controllers.DomainInfoResult'
         "400":
           description: Bad Request
           schema:
@@ -233,7 +263,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/controllers.AddResult'
+            $ref: '#/definitions/controllers.DomainInfoResult'
         "400":
           description: Bad Request
           schema:
@@ -267,7 +297,7 @@ paths:
         "204":
           description: No Content
           schema:
-            $ref: '#/definitions/controllers.AddResult'
+            $ref: '#/definitions/controllers.DomainInfoResult'
         "400":
           description: Bad Request
           schema:
@@ -298,7 +328,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/controllers.AddResult'
+            $ref: '#/definitions/controllers.DomainInfoResult'
         "400":
           description: Bad Request
           schema:

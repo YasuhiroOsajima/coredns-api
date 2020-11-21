@@ -20,7 +20,7 @@
     "paths": {
         "/v1/domains": {
             "get": {
-                "description": "List domains on coredns",
+                "description": "List domains from coredns",
                 "produces": [
                     "application/json"
                 ],
@@ -70,7 +70,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/controllers.AddResult"
+                            "$ref": "#/definitions/controllers.DomainInfoResult"
                         }
                     },
                     "400": {
@@ -90,14 +90,14 @@
         },
         "/v1/domains/{domain_uuid}": {
             "get": {
-                "description": "Get new domain to coredns",
+                "description": "Get domain from coredns",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Domain"
                 ],
-                "summary": "Get new domain",
+                "summary": "Get domain",
                 "parameters": [
                     {
                         "type": "string",
@@ -111,7 +111,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/controllers.AddResult"
+                            "$ref": "#/definitions/controllers.DomainInfoResult"
                         }
                     },
                     "400": {
@@ -139,7 +139,7 @@
                 "tags": [
                     "Domain"
                 ],
-                "summary": "Delete new domain",
+                "summary": "Delete domain",
                 "parameters": [
                     {
                         "type": "string",
@@ -175,6 +175,51 @@
             }
         },
         "/v1/domains/{domain_uuid}/hosts": {
+            "get": {
+                "description": "List hosts from domain",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Host"
+                ],
+                "summary": "List hosts",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target domain's UUID",
+                        "name": "domain_uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.DomainInfoResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Add new host to domain",
                 "consumes": [
@@ -209,7 +254,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/controllers.AddResult"
+                            "$ref": "#/definitions/controllers.DomainInfoResult"
                         }
                     },
                     "400": {
@@ -266,7 +311,7 @@
                     "204": {
                         "description": "No Content",
                         "schema": {
-                            "$ref": "#/definitions/controllers.AddResult"
+                            "$ref": "#/definitions/controllers.DomainInfoResult"
                         }
                     },
                     "400": {
@@ -320,7 +365,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/controllers.AddResult"
+                            "$ref": "#/definitions/controllers.DomainInfoResult"
                         }
                     },
                     "400": {
@@ -363,7 +408,7 @@
                     "204": {
                         "description": "No Content",
                         "schema": {
-                            "$ref": "#/definitions/controllers.AddResult"
+                            "$ref": "#/definitions/controllers.DomainInfoResult"
                         }
                     },
                     "400": {
@@ -383,7 +428,7 @@
         }
     },
     "definitions": {
-        "controllers.AddResult": {
+        "controllers.DomainInfoResult": {
             "type": "object",
             "properties": {
                 "domain": {

@@ -26,6 +26,7 @@ func Router() {
 	Router.DELETE("/v1/domains/:domain_uuid", func(c *gin.Context) { dcntr.Delete(c) })
 
 	Router.POST("/v1/domains/:domain_uuid/hosts", func(c *gin.Context) { hcntr.Add(c) })
+	Router.GET("/v1/domains/:domain_uuid/hosts", func(c *gin.Context) { hcntr.List(c) })
 	Router.PATCH("/v1/domains/:domain_uuid/hosts/:host_uuid", func(c *gin.Context) { hcntr.Update(c) })
 	Router.GET("/v1/domains/:domain_uuid/hosts/:host_uuid", func(c *gin.Context) { hcntr.Get(c) })
 	Router.DELETE("/v1/domains/:domain_uuid/hosts/:host_uuid", func(c *gin.Context) { hcntr.Delete(c) })

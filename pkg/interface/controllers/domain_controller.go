@@ -14,7 +14,7 @@ type DomainRequest struct {
 }
 
 // Result
-type AddResult struct {
+type DomainInfoResult struct {
 	DomainResult
 	Hosts []HostResult `json:"hosts"`
 }
@@ -63,7 +63,7 @@ func NewDomainController(itr *usecase.DomainInteractor) *DomainController {
 // @Accept json
 // @Produce json
 // @Param domain body DomainRequest true "Request body parameter with json format"
-// @Success 201 {object} AddResult
+// @Success 201 {object} DomainInfoResult
 // @Failure 400 {object} HTTPError
 // @Failure 500 {object} HTTPError
 // @Router /v1/domains [post]
@@ -103,7 +103,7 @@ func (d *DomainController) Add(c Context) {
 		return
 	}
 
-	var result AddResult
+	var result DomainInfoResult
 	result.Domain = newDomain.Name.String()
 	result.Uuid = newDomain.Uuid.String()
 	c.JSON(http.StatusCreated, result)
@@ -112,7 +112,7 @@ func (d *DomainController) Add(c Context) {
 // List handler doc
 // @Tags Domain
 // @Summary List domains
-// @Description List domains on coredns
+// @Description List domains from coredns
 // @Produce json
 // @Success 200 {object} DomainListResult
 // @Failure 500 {object} HTTPError
@@ -139,11 +139,11 @@ func (d *DomainController) List(c Context) {
 
 // Get handler doc
 // @Tags Domain
-// @Summary Get new domain
-// @Description Get new domain to coredns
+// @Summary Get domain
+// @Description Get domain from coredns
 // @Produce json
 // @Param domain_uuid path string true "Target domain's UUID"
-// @Success 200 {object} AddResult
+// @Success 200 {object} DomainInfoResult
 // @Failure 400 {object} HTTPError
 // @Failure 404 {object} HTTPError
 // @Failure 500 {object} HTTPError
@@ -180,7 +180,7 @@ func (d *DomainController) Get(c Context) {
 		hosts = append(hosts, host)
 	}
 
-	var result AddResult
+	var result DomainInfoResult
 	result.Domain = gotDomain.Name.String()
 	result.Uuid = gotDomain.Uuid.String()
 	result.Hosts = hosts
@@ -189,7 +189,7 @@ func (d *DomainController) Get(c Context) {
 
 // Delete handler doc
 // @Tags Domain
-// @Summary Delete new domain
+// @Summary Delete domain
 // @Description Delete new domain to coredns
 // @Param domain_uuid path string true "Target domain's UUID"
 // @Success 204

@@ -35,7 +35,7 @@ var doc = `{
     "paths": {
         "/v1/domains": {
             "get": {
-                "description": "List domains on coredns",
+                "description": "List domains from coredns",
                 "produces": [
                     "application/json"
                 ],
@@ -85,7 +85,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/controllers.AddResult"
+                            "$ref": "#/definitions/controllers.DomainInfoResult"
                         }
                     },
                     "400": {
@@ -105,14 +105,14 @@ var doc = `{
         },
         "/v1/domains/{domain_uuid}": {
             "get": {
-                "description": "Get new domain to coredns",
+                "description": "Get domain from coredns",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Domain"
                 ],
-                "summary": "Get new domain",
+                "summary": "Get domain",
                 "parameters": [
                     {
                         "type": "string",
@@ -126,7 +126,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/controllers.AddResult"
+                            "$ref": "#/definitions/controllers.DomainInfoResult"
                         }
                     },
                     "400": {
@@ -154,7 +154,7 @@ var doc = `{
                 "tags": [
                     "Domain"
                 ],
-                "summary": "Delete new domain",
+                "summary": "Delete domain",
                 "parameters": [
                     {
                         "type": "string",
@@ -190,6 +190,51 @@ var doc = `{
             }
         },
         "/v1/domains/{domain_uuid}/hosts": {
+            "get": {
+                "description": "List hosts from domain",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Host"
+                ],
+                "summary": "List hosts",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target domain's UUID",
+                        "name": "domain_uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.DomainInfoResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Add new host to domain",
                 "consumes": [
@@ -224,7 +269,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/controllers.AddResult"
+                            "$ref": "#/definitions/controllers.DomainInfoResult"
                         }
                     },
                     "400": {
@@ -281,7 +326,7 @@ var doc = `{
                     "204": {
                         "description": "No Content",
                         "schema": {
-                            "$ref": "#/definitions/controllers.AddResult"
+                            "$ref": "#/definitions/controllers.DomainInfoResult"
                         }
                     },
                     "400": {
@@ -335,7 +380,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/controllers.AddResult"
+                            "$ref": "#/definitions/controllers.DomainInfoResult"
                         }
                     },
                     "400": {
@@ -378,7 +423,7 @@ var doc = `{
                     "204": {
                         "description": "No Content",
                         "schema": {
-                            "$ref": "#/definitions/controllers.AddResult"
+                            "$ref": "#/definitions/controllers.DomainInfoResult"
                         }
                     },
                     "400": {
@@ -398,7 +443,7 @@ var doc = `{
         }
     },
     "definitions": {
-        "controllers.AddResult": {
+        "controllers.DomainInfoResult": {
             "type": "object",
             "properties": {
                 "domain": {
