@@ -35,7 +35,6 @@ func TestNewDomain(t *testing.T) {
 }
 
 func TestNewOriginalDomain(t *testing.T) {
-
 	name := "hogehoge.hoge"
 	domain, err := NewOriginalDomain(name)
 	if err != nil {
