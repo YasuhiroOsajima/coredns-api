@@ -58,8 +58,18 @@ func TestAddCoreDNSConf(t *testing.T) {
 	addDomain, _ := NewOriginalDomain(addDomName)
 
 	conf.Add(addDomain)
-	addedDomain := conf.Cache[addDomain.Name]
+	addedDomain, _ := conf.GetByName(addDomain.Name)
 	if addedDomain != addDomain {
+		t.Error(addedDomain)
+	}
+
+	addedDomain, _ = conf.GetByUuid(addDomain.Uuid)
+	if addedDomain != addDomain {
+		t.Error(addedDomain)
+	}
+
+	addedDomainList := conf.GetAll()
+	if len(addedDomainList) > 0 && addedDomainList[0] != addDomain {
 		t.Error(addedDomain)
 	}
 }
