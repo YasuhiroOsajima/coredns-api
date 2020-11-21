@@ -23,7 +23,7 @@ func (f *Filesystem) LoadTextFile(filePath string) (string, error) {
 }
 
 func (f *Filesystem) WriteTextFile(filePath, fileInfo string) error {
-	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, 0644)
+	file, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}

@@ -49,7 +49,8 @@ func NewCoreDNSConf(allDomainInfo []*Domain) *CoreDNSConf {
 	forward := `
 . {
     forward . 8.8.8.8
-}`
+}
+`
 
 	cache := map[DomainName]*Domain{}
 	for _, dom := range allDomainInfo {
