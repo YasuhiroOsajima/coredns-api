@@ -224,4 +224,3 @@ Content-Type: application/json
 
 ## Todo
 - Use goroutine to update filesystem sequentially.
-- Database setup from CoreDNS config.
