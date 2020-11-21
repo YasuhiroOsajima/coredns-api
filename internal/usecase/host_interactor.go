@@ -1,6 +1,8 @@
 package usecase
 
-import "coredns_api/internal/model"
+import (
+	"coredns_api/internal/model"
+)
 
 type HostInteractor struct {
 	fsRepository IFilesystemRepository
@@ -81,6 +83,13 @@ func (i *HostInteractor) Update(newHost *model.Host, domainUuid model.Uuid) erro
 	var newHosts []*model.Host
 	found := false
 	for _, h := range domain.Hosts {
+		if h.Name == newHost.Name {
+			return NewHostDuplicatedError("hostname", newHost.Name)
+		}
+		if h.Address == newHost.Address {
+			return NewHostDuplicatedError("address", newHost.Address)
+		}
+
 		if h.Uuid == newHost.Uuid {
 			newHosts = append(newHosts, newHost)
 			found = true

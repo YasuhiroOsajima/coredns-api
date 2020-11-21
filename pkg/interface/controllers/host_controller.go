@@ -42,6 +42,12 @@ func (d *HostController) Add(c Context) {
 		log.Print(err)
 		return
 	}
+	targetDomain, err := d.interactor.GetDomain(targetDomainUuid)
+	if err != nil {
+		NewError(c, http.StatusNotFound, err)
+		log.Print(err)
+		return
+	}
 
 	var requestedHost HostRequest
 	err = c.ShouldBindJSON(&requestedHost)
@@ -55,7 +61,7 @@ func (d *HostController) Add(c Context) {
 
 	name := requestedHost.Name
 	address := requestedHost.Address
-	newHost, err := model.NewOriginalHost(name, address)
+	newHost, err := model.NewOriginalHost(name, address, targetDomain.Name)
 	if err != nil {
 		switch e := err.(type) {
 		case *model.InvalidParameterGiven:
@@ -169,6 +175,12 @@ func (d *HostController) Update(c Context) {
 		log.Print(err)
 		return
 	}
+	targetDomain, err := d.interactor.GetDomain(targetDomainUuid)
+	if err != nil {
+		NewError(c, http.StatusBadRequest, err)
+		log.Print(err)
+		return
+	}
 
 	hostUuid := c.Param("host_uuid")
 	targetHostUuid, err := model.NewUuid(hostUuid)
@@ -217,7 +229,8 @@ func (d *HostController) Update(c Context) {
 		address = host.Address
 	}
 
-	updatedHost, err := model.NewHost(targetHostUuid, name, address)
+	hostFqdn := model.GetFQDN(name, targetDomain.Name.String())
+	updatedHost, err := model.NewHost(targetHostUuid, hostFqdn, address)
 	if err != nil {
 		NewError(c, http.StatusBadRequest, err)
 		log.Print(err)
@@ -229,6 +242,8 @@ func (d *HostController) Update(c Context) {
 		switch e := err.(type) {
 		case *model.HostNotFoundError, *model.DomainNotFoundError:
 			NewError(c, http.StatusNotFound, err)
+		case *usecase.HostDuplicatedError:
+			NewError(c, http.StatusBadRequest, err)
 		default:
 			NewError(c,
 				http.StatusInternalServerError,

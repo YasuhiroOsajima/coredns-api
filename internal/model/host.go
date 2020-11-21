@@ -15,14 +15,22 @@ type Host struct {
 	Address string
 }
 
-func NewOriginalHost(name, address string) (*Host, error) {
+func GetFQDN(hostname, domain string) string {
+	if strings.HasSuffix(hostname, domain) {
+		return hostname
+	}
+
+	return hostname + "." + domain
+}
+
+func NewOriginalHost(name, address string, domainName DomainName) (*Host, error) {
 	u, _ := uuid.NewRandom()
 	hostUuid, err := NewUuid(u.String())
 	if err != nil {
 		return nil, err
 	}
-
-	host, err := NewHost(hostUuid, name, address)
+	hostFqdn := GetFQDN(name, domainName.String())
+	host, err := NewHost(hostUuid, hostFqdn, address)
 	if err != nil {
 		return nil, err
 	}
@@ -30,20 +38,20 @@ func NewOriginalHost(name, address string) (*Host, error) {
 	return host, nil
 }
 
-func NewHost(uuid Uuid, name, address string) (*Host, error) {
+func NewHost(uuid Uuid, hostFqdn, address string) (*Host, error) {
 	nameMatcher := regexp.MustCompile("^[0-9a-zA-Z._-]+$").MatchString
-	if len(name) == 0 || !nameMatcher(name) {
-		mes := "invalid Host name is specified with name: '" + name + "', address: '" + address + "'"
+	if len(hostFqdn) == 0 || !nameMatcher(hostFqdn) {
+		mes := "invalid Host hostFqdn is specified with hostFqdn: '" + hostFqdn + "', address: '" + address + "'"
 		return nil, NewInvalidParameterGiven(mes)
 	}
 
 	ipMatcher := regexp.MustCompile("^[0-9.]+$").MatchString
 	if len(address) < 7 || len(address) > 15 || strings.Count(address, ".") != 3 || !ipMatcher(address) {
-		mes := "invalid IP address is specified with name: '" + name + "', address: '" + address + "'"
+		mes := "invalid IP address is specified with hostFqdn: '" + hostFqdn + "', address: '" + address + "'"
 		return nil, NewInvalidParameterGiven(mes)
 	}
 
-	return &Host{uuid, name, address}, nil
+	return &Host{uuid, hostFqdn, address}, nil
 }
 
 func (h *Host) GetHostInfo() (string, error) {
