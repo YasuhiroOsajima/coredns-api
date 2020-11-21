@@ -1,4 +1,48 @@
 basePath: /v1
+definitions:
+  controllers.AddResult:
+    properties:
+      domain:
+        type: string
+      hosts:
+        items:
+          $ref: '#/definitions/controllers.HostResult'
+        type: array
+      uuid:
+        type: string
+    type: object
+  controllers.DomainListResult:
+    properties:
+      domains:
+        items:
+          $ref: '#/definitions/controllers.DomainResult'
+        type: array
+    type: object
+  controllers.DomainResult:
+    properties:
+      domain:
+        type: string
+      uuid:
+        type: string
+    type: object
+  controllers.HTTPError:
+    properties:
+      code:
+        example: 400
+        type: integer
+      message:
+        example: status bad request
+        type: string
+    type: object
+  controllers.HostResult:
+    properties:
+      address:
+        type: string
+      hostname:
+        type: string
+      uuid:
+        type: string
+    type: object
 host: 172.28.21.40:8080
 info:
   contact:
@@ -12,5 +56,256 @@ info:
   termsOfService: http://swagger.io/terms/
   title: CoreDNS API
   version: "1.0"
-paths: {}
+paths:
+  /v1/domains:
+    get:
+      description: List domains on coredns
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.DomainListResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+      summary: List domains
+      tags:
+      - Domain
+    post:
+      consumes:
+      - application/json
+      description: Add new domain to coredns
+      parameters:
+      - description: domain
+        in: body
+        name: domain
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/controllers.AddResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+      summary: Add new domain
+      tags:
+      - Domain
+  /v1/domains/{domain_uuid}:
+    delete:
+      description: Delete new domain to coredns
+      parameters:
+      - description: domain_uuid
+        in: path
+        name: domain_uuid
+        required: true
+        type: string
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+      summary: Delete new domain
+      tags:
+      - Domain
+    get:
+      description: Get new domain to coredns
+      parameters:
+      - description: domain_uuid
+        in: path
+        name: domain_uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.AddResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+      summary: Get new domain
+      tags:
+      - Domain
+  /v1/domains/{domain_uuid}/hosts:
+    patch:
+      consumes:
+      - application/json
+      description: Update host info
+      parameters:
+      - description: domain_uuid
+        in: path
+        name: domain_uuid
+        required: true
+        type: string
+      - description: hostname
+        in: body
+        name: hostname
+        schema:
+          type: string
+      - description: address
+        in: body
+        name: address
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/controllers.AddResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+      summary: Update host
+      tags:
+      - Host
+    post:
+      consumes:
+      - application/json
+      description: Add new host to domain
+      parameters:
+      - description: domain_uuid
+        in: path
+        name: domain_uuid
+        required: true
+        type: string
+      - description: hostname
+        in: body
+        name: hostname
+        required: true
+        schema:
+          type: string
+      - description: address
+        in: body
+        name: address
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/controllers.AddResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+      summary: Add new host
+      tags:
+      - Host
+  /v1/domains/{domain_uuid}/hosts/{host_uuid}:
+    delete:
+      description: Delete host info
+      parameters:
+      - description: domain_uuid
+        in: path
+        name: domain_uuid
+        required: true
+        type: string
+      - description: host_uuid
+        in: path
+        name: host_uuid
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/controllers.AddResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+      summary: Delete host
+      tags:
+      - Host
+    get:
+      description: Get host info
+      parameters:
+      - description: domain_uuid
+        in: path
+        name: domain_uuid
+        required: true
+        type: string
+      - description: host_uuid
+        in: path
+        name: host_uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.AddResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+      summary: Get host
+      tags:
+      - Host
 swagger: "2.0"

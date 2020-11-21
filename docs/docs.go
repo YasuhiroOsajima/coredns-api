@@ -32,7 +32,455 @@ var doc = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {}
+    "paths": {
+        "/v1/domains": {
+            "get": {
+                "description": "List domains on coredns",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Domain"
+                ],
+                "summary": "List domains",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.DomainListResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Add new domain to coredns",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Domain"
+                ],
+                "summary": "Add new domain",
+                "parameters": [
+                    {
+                        "description": "domain",
+                        "name": "domain",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.AddResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/domains/{domain_uuid}": {
+            "get": {
+                "description": "Get new domain to coredns",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Domain"
+                ],
+                "summary": "Get new domain",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "domain_uuid",
+                        "name": "domain_uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.AddResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete new domain to coredns",
+                "tags": [
+                    "Domain"
+                ],
+                "summary": "Delete new domain",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "domain_uuid",
+                        "name": "domain_uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/domains/{domain_uuid}/hosts": {
+            "post": {
+                "description": "Add new host to domain",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Host"
+                ],
+                "summary": "Add new host",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "domain_uuid",
+                        "name": "domain_uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "hostname",
+                        "name": "hostname",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "address",
+                        "name": "address",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.AddResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update host info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Host"
+                ],
+                "summary": "Update host",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "domain_uuid",
+                        "name": "domain_uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "hostname",
+                        "name": "hostname",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "address",
+                        "name": "address",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.AddResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/domains/{domain_uuid}/hosts/{host_uuid}": {
+            "get": {
+                "description": "Get host info",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Host"
+                ],
+                "summary": "Get host",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "domain_uuid",
+                        "name": "domain_uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "host_uuid",
+                        "name": "host_uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.AddResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete host info",
+                "tags": [
+                    "Host"
+                ],
+                "summary": "Delete host",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "domain_uuid",
+                        "name": "domain_uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "host_uuid",
+                        "name": "host_uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.AddResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "controllers.AddResult": {
+            "type": "object",
+            "properties": {
+                "domain": {
+                    "type": "string"
+                },
+                "hosts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controllers.HostResult"
+                    }
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "controllers.DomainListResult": {
+            "type": "object",
+            "properties": {
+                "domains": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controllers.DomainResult"
+                    }
+                }
+            }
+        },
+        "controllers.DomainResult": {
+            "type": "object",
+            "properties": {
+                "domain": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "controllers.HTTPError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 400
+                },
+                "message": {
+                    "type": "string",
+                    "example": "status bad request"
+                }
+            }
+        },
+        "controllers.HostResult": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        }
+    }
 }`
 
 type swaggerInfo struct {
