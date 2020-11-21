@@ -12,14 +12,12 @@ import (
 // # cat coredns.conf
 // hogehoge.hoge. {
 //     hosts /var/lib/coredns/hosts/hogehoge.hoge
-//
 //     reload 10s 5s
 //     log
 // }
 //
 // fugafuga.fuga. {
 //     hosts /var/lib/coredns/hosts/fugafuga.fuga
-//
 //     reload 10s 5s
 //     log
 // }
