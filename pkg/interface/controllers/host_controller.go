@@ -133,9 +133,7 @@ func (d *HostController) Update(c Context) {
 	host, err := d.Interactor.Get(targetHostUuid, targetDomainUuid)
 	if err != nil {
 		switch e := err.(type) {
-		case *model.HostNotFoundError:
-			NewError(c, http.StatusNotFound, err)
-		case *model.DomainNotFoundError:
+		case *model.HostNotFoundError, *model.DomainNotFoundError:
 			NewError(c, http.StatusNotFound, err)
 		default:
 			NewError(c,
@@ -181,9 +179,7 @@ func (d *HostController) Update(c Context) {
 	err = d.Interactor.Update(updatedHost, targetDomainUuid)
 	if err != nil {
 		switch e := err.(type) {
-		case *model.HostNotFoundError:
-			NewError(c, http.StatusNotFound, err)
-		case *model.DomainNotFoundError:
+		case *model.HostNotFoundError, *model.DomainNotFoundError:
 			NewError(c, http.StatusNotFound, err)
 		default:
 			NewError(c,
@@ -252,9 +248,7 @@ func (d *HostController) Get(c Context) {
 	host, err := d.Interactor.Get(targetHostUuid, targetDomainUuid)
 	if err != nil {
 		switch e := err.(type) {
-		case *model.HostNotFoundError:
-			NewError(c, http.StatusNotFound, err)
-		case *model.DomainNotFoundError:
+		case *model.HostNotFoundError, *model.DomainNotFoundError:
 			NewError(c, http.StatusNotFound, err)
 		default:
 			NewError(c,
@@ -337,9 +331,7 @@ func (d *HostController) Delete(c Context) {
 	err = d.Interactor.Delete(host, targetDomainUuid)
 	if err != nil {
 		switch e := err.(type) {
-		case *model.HostNotFoundError:
-			NewError(c, http.StatusNotFound, err)
-		case *model.DomainNotFoundError:
+		case *model.HostNotFoundError, *model.DomainNotFoundError:
 			NewError(c, http.StatusNotFound, err)
 		default:
 			NewError(c,
