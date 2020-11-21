@@ -62,7 +62,7 @@ func NewDomainController(itr *usecase.DomainInteractor) *DomainController {
 // @Description Add new domain to coredns
 // @Accept json
 // @Produce json
-// @Param domain body string true "domain"
+// @Param domain body DomainRequest true "Request body parameter with json format"
 // @Success 201 {object} AddResult
 // @Failure 400 {object} HTTPError
 // @Failure 500 {object} HTTPError
@@ -142,7 +142,7 @@ func (d *DomainController) List(c Context) {
 // @Summary Get new domain
 // @Description Get new domain to coredns
 // @Produce json
-// @Param domain_uuid path string true "domain_uuid"
+// @Param domain_uuid path string true "Target domain's UUID"
 // @Success 200 {object} AddResult
 // @Failure 400 {object} HTTPError
 // @Failure 404 {object} HTTPError
@@ -191,7 +191,7 @@ func (d *DomainController) Get(c Context) {
 // @Tags Domain
 // @Summary Delete new domain
 // @Description Delete new domain to coredns
-// @Param domain_uuid path string true "domain_uuid"
+// @Param domain_uuid path string true "Target domain's UUID"
 // @Success 204
 // @Failure 400 {object} HTTPError
 // @Failure 404 {object} HTTPError

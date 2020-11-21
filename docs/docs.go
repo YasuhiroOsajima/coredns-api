@@ -72,12 +72,12 @@ var doc = `{
                 "summary": "Add new domain",
                 "parameters": [
                     {
-                        "description": "domain",
+                        "description": "Request body parameter with json format",
                         "name": "domain",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/controllers.DomainRequest"
                         }
                     }
                 ],
@@ -116,7 +116,7 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "domain_uuid",
+                        "description": "Target domain's UUID",
                         "name": "domain_uuid",
                         "in": "path",
                         "required": true
@@ -158,7 +158,7 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "domain_uuid",
+                        "description": "Target domain's UUID",
                         "name": "domain_uuid",
                         "in": "path",
                         "required": true
@@ -205,27 +205,18 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "domain_uuid",
+                        "description": "Target domain's UUID",
                         "name": "domain_uuid",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "hostname",
-                        "name": "hostname",
+                        "description": "Request body parameter with json format",
+                        "name": "host",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "address",
-                        "name": "address",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/controllers.HostRequest"
                         }
                     }
                 ],
@@ -271,25 +262,18 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "domain_uuid",
+                        "description": "Target domain's UUID",
                         "name": "domain_uuid",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "hostname",
-                        "name": "hostname",
+                        "description": "Request body parameter with json format",
+                        "name": "host",
                         "in": "body",
+                        "required": true,
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "address",
-                        "name": "address",
-                        "in": "body",
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/controllers.HostRequest"
                         }
                     }
                 ],
@@ -334,14 +318,14 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "domain_uuid",
+                        "description": "Target domain's UUID",
                         "name": "domain_uuid",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "host_uuid",
+                        "description": "Target host's UUID",
                         "name": "host_uuid",
                         "in": "path",
                         "required": true
@@ -377,14 +361,14 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "domain_uuid",
+                        "description": "Target domain's UUID",
                         "name": "domain_uuid",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "host_uuid",
+                        "description": "Target host's UUID",
                         "name": "host_uuid",
                         "in": "path",
                         "required": true
@@ -442,6 +426,14 @@ var doc = `{
                 }
             }
         },
+        "controllers.DomainRequest": {
+            "type": "object",
+            "properties": {
+                "domain": {
+                    "type": "string"
+                }
+            }
+        },
         "controllers.DomainResult": {
             "type": "object",
             "properties": {
@@ -463,6 +455,17 @@ var doc = `{
                 "message": {
                     "type": "string",
                     "example": "status bad request"
+                }
+            }
+        },
+        "controllers.HostRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "hostname": {
+                    "type": "string"
                 }
             }
         },

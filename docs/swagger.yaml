@@ -18,6 +18,11 @@ definitions:
           $ref: '#/definitions/controllers.DomainResult'
         type: array
     type: object
+  controllers.DomainRequest:
+    properties:
+      domain:
+        type: string
+    type: object
   controllers.DomainResult:
     properties:
       domain:
@@ -32,6 +37,13 @@ definitions:
         type: integer
       message:
         example: status bad request
+        type: string
+    type: object
+  controllers.HostRequest:
+    properties:
+      address:
+        type: string
+      hostname:
         type: string
     type: object
   controllers.HostResult:
@@ -79,12 +91,12 @@ paths:
       - application/json
       description: Add new domain to coredns
       parameters:
-      - description: domain
+      - description: Request body parameter with json format
         in: body
         name: domain
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/controllers.DomainRequest'
       produces:
       - application/json
       responses:
@@ -107,7 +119,7 @@ paths:
     delete:
       description: Delete new domain to coredns
       parameters:
-      - description: domain_uuid
+      - description: Target domain's UUID
         in: path
         name: domain_uuid
         required: true
@@ -133,7 +145,7 @@ paths:
     get:
       description: Get new domain to coredns
       parameters:
-      - description: domain_uuid
+      - description: Target domain's UUID
         in: path
         name: domain_uuid
         required: true
@@ -166,21 +178,17 @@ paths:
       - application/json
       description: Update host info
       parameters:
-      - description: domain_uuid
+      - description: Target domain's UUID
         in: path
         name: domain_uuid
         required: true
         type: string
-      - description: hostname
+      - description: Request body parameter with json format
         in: body
-        name: hostname
+        name: host
+        required: true
         schema:
-          type: string
-      - description: address
-        in: body
-        name: address
-        schema:
-          type: string
+          $ref: '#/definitions/controllers.HostRequest'
       produces:
       - application/json
       responses:
@@ -208,23 +216,17 @@ paths:
       - application/json
       description: Add new host to domain
       parameters:
-      - description: domain_uuid
+      - description: Target domain's UUID
         in: path
         name: domain_uuid
         required: true
         type: string
-      - description: hostname
+      - description: Request body parameter with json format
         in: body
-        name: hostname
+        name: host
         required: true
         schema:
-          type: string
-      - description: address
-        in: body
-        name: address
-        required: true
-        schema:
-          type: string
+          $ref: '#/definitions/controllers.HostRequest'
       produces:
       - application/json
       responses:
@@ -251,12 +253,12 @@ paths:
     delete:
       description: Delete host info
       parameters:
-      - description: domain_uuid
+      - description: Target domain's UUID
         in: path
         name: domain_uuid
         required: true
         type: string
-      - description: host_uuid
+      - description: Target host's UUID
         in: path
         name: host_uuid
         required: true
@@ -280,12 +282,12 @@ paths:
     get:
       description: Get host info
       parameters:
-      - description: domain_uuid
+      - description: Target domain's UUID
         in: path
         name: domain_uuid
         required: true
         type: string
-      - description: host_uuid
+      - description: Target host's UUID
         in: path
         name: host_uuid
         required: true

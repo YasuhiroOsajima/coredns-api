@@ -27,9 +27,8 @@ func NewHostController(itr *usecase.HostInteractor) *HostController {
 // @Description Add new host to domain
 // @Accept json
 // @Produce json
-// @Param domain_uuid path string true "domain_uuid"
-// @Param hostname body string true "hostname"
-// @Param address body string true "address"
+// @Param domain_uuid path string true "Target domain's UUID"
+// @Param host body HostRequest true "Request body parameter with json format"
 // @Success 201 {object} AddResult
 // @Failure 400 {object} HTTPError
 // @Failure 404 {object} HTTPError
@@ -105,9 +104,8 @@ func (d *HostController) Add(c Context) {
 // @Description Update host info
 // @Accept json
 // @Produce json
-// @Param domain_uuid path string true "domain_uuid"
-// @Param hostname body string false "hostname"
-// @Param address body string false "address"
+// @Param domain_uuid path string true "Target domain's UUID"
+// @Param host body HostRequest true "Request body parameter with json format"
 // @Success 204 {object} AddResult
 // @Failure 400 {object} HTTPError
 // @Failure 404 {object} HTTPError
@@ -222,8 +220,8 @@ func (d *HostController) Update(c Context) {
 // @Summary Get host
 // @Description Get host info
 // @Produce json
-// @Param domain_uuid path string true "domain_uuid"
-// @Param host_uuid path string true "host_uuid"
+// @Param domain_uuid path string true "Target domain's UUID"
+// @Param host_uuid path string true "Target host's UUID"
 // @Success 200 {object} AddResult
 // @Failure 400 {object} HTTPError
 // @Failure 404 {object} HTTPError
@@ -290,8 +288,8 @@ func (d *HostController) Get(c Context) {
 // @Tags Host
 // @Summary Delete host
 // @Description Delete host info
-// @Param domain_uuid path string true "domain_uuid"
-// @Param host_uuid path string true "host_uuid"
+// @Param domain_uuid path string true "Target domain's UUID"
+// @Param host_uuid path string true "Target host's UUID"
 // @Success 204 {object} AddResult
 // @Failure 400 {object} HTTPError
 // @Failure 404 {object} HTTPError
