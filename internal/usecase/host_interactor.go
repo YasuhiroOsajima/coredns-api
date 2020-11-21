@@ -1,8 +1,6 @@
 package usecase
 
-import (
-	"coredns_api/internal/model"
-)
+import "coredns_api/internal/model"
 
 type HostInteractor struct {
 	fsRepository IFilesystemRepository

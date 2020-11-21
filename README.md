@@ -21,8 +21,6 @@ Depending OS environment variables:
   File path of coredns conf.
 - HOSTS_DIR  
   Directory path of coredns hosts files.
-- DB_PATH  
-  File path of SQLite3 database.
 
 ## Usage
 

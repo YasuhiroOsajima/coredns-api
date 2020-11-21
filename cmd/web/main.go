@@ -1,8 +1,6 @@
 package main
 
-import (
-	"coredns_api/cmd/web/infrastructure"
-)
+import "coredns_api/cmd/web/infrastructure"
 
 // @title CoreDNS API
 // @version 1.0

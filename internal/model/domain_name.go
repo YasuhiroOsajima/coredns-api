@@ -1,8 +1,6 @@
 package model
 
-import (
-	"regexp"
-)
+import "regexp"
 
 type DomainName string
 

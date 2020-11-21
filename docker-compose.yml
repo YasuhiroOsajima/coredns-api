@@ -25,4 +25,3 @@ services:
       - PORT=8080
       - CONF_PATH=/var/lib/coredns/coredns.conf
       - HOSTS_DIR=/var/lib/coredns/hosts/
-      - DB_PATH=/var/lib/coredns-api/coredns-api.db
