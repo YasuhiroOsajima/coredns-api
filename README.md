@@ -2,7 +2,7 @@
 
 ## Install
 
-build
+### build
 
 ```bash
 cd coredns-api/
@@ -12,7 +12,7 @@ or
 bash script/docker_build.sh
 ```
 
-Depending OS environment variables:
+### set depending OS environment variables
 - SERVER  
   This API server's IP address.
 - PORT  
@@ -21,6 +21,16 @@ Depending OS environment variables:
   File path of coredns conf.
 - HOSTS_DIR  
   Directory path of coredns hosts files.
+
+```bash
+vim docker-compose.yml
+```
+
+### start
+
+```bash
+docker-compose up
+```
 
 ## Usage
 
