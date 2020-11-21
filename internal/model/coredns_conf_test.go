@@ -69,7 +69,7 @@ func TestAddCoreDNSConf(t *testing.T) {
 	}
 
 	addedDomainList := conf.GetAll()
-	if len(addedDomainList) > 0 && addedDomainList[0] != addDomain {
-		t.Error(addedDomain)
+	if len(addedDomainList) > 1 && (addedDomainList[0] != addDomain && addedDomainList[1] != addDomain) {
+		t.Error(addedDomainList[0])
 	}
 }
