@@ -14,7 +14,7 @@ func (i *HostInteractor) Add(newHost *model.Host, domainUuid model.Uuid) (*model
 	i.fsRepository.Lock()
 	defer i.fsRepository.UnLock()
 
-	gotDomain, err := i.GetDomain(domainUuid)
+	gotDomain, err := i.fsRepository.GetDomainByUuid(domainUuid)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (i *HostInteractor) Get(hostUuid, domainUuid model.Uuid) (*model.Host, erro
 	i.fsRepository.Lock()
 	defer i.fsRepository.UnLock()
 
-	domain, err := i.GetDomain(domainUuid)
+	domain, err := i.fsRepository.GetDomainByUuid(domainUuid)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (i *HostInteractor) Update(newHost *model.Host, domainUuid model.Uuid) erro
 	i.fsRepository.Lock()
 	defer i.fsRepository.UnLock()
 
-	domain, err := i.GetDomain(domainUuid)
+	domain, err := i.fsRepository.GetDomainByUuid(domainUuid)
 	if err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func (i *HostInteractor) Delete(host *model.Host, domainUuid model.Uuid) error {
 	i.fsRepository.Lock()
 	defer i.fsRepository.UnLock()
 
-	domain, err := i.GetDomain(domainUuid)
+	domain, err := i.fsRepository.GetDomainByUuid(domainUuid)
 	if err != nil {
 		return err
 	}

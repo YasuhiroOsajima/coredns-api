@@ -33,13 +33,13 @@ func NewOriginalHost(name, address string) (*Host, error) {
 func NewHost(uuid Uuid, name, address string) (*Host, error) {
 	nameMatcher := regexp.MustCompile("^[0-9a-zA-Z._-]+$").MatchString
 	if len(name) == 0 || !nameMatcher(name) {
-		mes := "invalid Host name is specified with uuid: '" + uuid.String() + "', nam: '" + name + "', address: '" + address + "'"
+		mes := "invalid Host name is specified with name: '" + name + "', address: '" + address + "'"
 		return nil, NewInvalidParameterGiven(mes)
 	}
 
 	ipMatcher := regexp.MustCompile("^[0-9.]+$").MatchString
 	if len(address) < 7 || len(address) > 15 || strings.Count(address, ".") != 3 || !ipMatcher(address) {
-		mes := "invalid IP address is specified with uuid: '" + uuid.String() + "', nam: '" + name + "', address: '" + address + "'"
+		mes := "invalid IP address is specified with name: '" + name + "', address: '" + address + "'"
 		return nil, NewInvalidParameterGiven(mes)
 	}
 
