@@ -93,7 +93,7 @@ func (d *HostController) Add(c Context) {
 		return
 	}
 
-	var hosts []HostResult
+	hosts := make([]HostResult, 0)
 	hostRes := HostResult{Name: newHost.Name, Address: newHost.Address, Uuid: newHost.Uuid.String()}
 	hosts = append(hosts, hostRes)
 
@@ -141,7 +141,7 @@ func (d *HostController) List(c Context) {
 		return
 	}
 
-	var hosts []HostResult
+	hosts := make([]HostResult, 0)
 	for _, h := range gotDomain.Hosts {
 		host := HostResult{Name: h.Name, Address: h.Address, Uuid: h.Uuid.String()}
 		hosts = append(hosts, host)
@@ -269,7 +269,7 @@ func (d *HostController) Update(c Context) {
 		return
 	}
 
-	var hosts []HostResult
+	hosts := make([]HostResult, 0)
 	hostRes := HostResult{Name: updatedHost.Name, Address: updatedHost.Address, Uuid: updatedHost.Uuid.String()}
 	hosts = append(hosts, hostRes)
 
@@ -338,7 +338,7 @@ func (d *HostController) Get(c Context) {
 		return
 	}
 
-	var hosts []HostResult
+	hosts := make([]HostResult, 0)
 	hostRes := HostResult{Name: host.Name, Address: host.Address, Uuid: host.Uuid.String()}
 	hosts = append(hosts, hostRes)
 
