@@ -16,6 +16,7 @@ func GetHostsFilePath(domainName DomainName) string {
 type Domain struct {
 	Uuid           Uuid
 	Name           DomainName
+	Tenants        []Uuid
 	Hosts          []*Host
 	DomainFilePath string
 	ReloadInterval string
@@ -55,6 +56,8 @@ func NewEmptyDomain(uuid Uuid, name string) (*Domain, error) {
 func NewDomain(name, fileInfo string) (*Domain, error) {
 	var domain *Domain
 	var hosts []*Host
+	var tenants []Uuid
+	inTenats := false
 	var err error
 
 	for _, line := range strings.Split(fileInfo, "\n") {
@@ -62,6 +65,9 @@ func NewDomain(name, fileInfo string) (*Domain, error) {
 		//
 		// ```
 		// # DomainUUID: 3e8fc6b1-0a93-4c57-9f2b-95d3e66a66e0
+		// # Tenats:
+		// #   - df397e50-8006-450e-b18b-5c5bd940baff
+		// #   - 02c03bd4-fe2e-45f2-85b6-b535af15215d
 		// 172.21.1.1  hogeserver1.hogehoge.hoge  # 5b9ea8eb-5ce5-422a-9d70-37d25fa896ae
 		// 172.21.1.2  hogeserver2.hogehoge.hoge  # f0c5edcd-3b18-4c26-a8e1-3f3495504dd6
 		// ````
@@ -79,7 +85,17 @@ func NewDomain(name, fileInfo string) (*Domain, error) {
 			if err != nil {
 				return nil, err
 			}
+		} else if strings.Contains(commentInfo, "Tenats:") {
+			inTenats = true
+		} else if inTenats && strings.Contains(commentInfo, " - ") && strings.HasPrefix(line, "#") {
+			tenantId := splitComment[len(splitComment)-1]
+			tenantUuid, err := NewUuid(tenantId)
+			if err != nil {
+				return nil, NewServerSideError(err.Error())
+			}
+			tenants = append(tenants, tenantUuid)
 		} else if strings.Contains(line, "-") && strings.Contains(line, ".") && strings.Contains(line, "#") {
+			inTenats = false
 
 			hostId := splitComment[0]
 			splitHost := strings.Fields(hostInfo)
@@ -105,6 +121,7 @@ func NewDomain(name, fileInfo string) (*Domain, error) {
 	}
 
 	domain.Hosts = hosts
+	domain.Tenants = tenants
 	return domain, nil
 }
 
@@ -119,6 +136,14 @@ func (d *Domain) GetFileInfo() (string, error) {
 		return "", err
 	}
 	result := out.String()
+
+	result += `# Tenats:
+`
+
+	for _, tUuid := range d.Tenants {
+		result += `#   - ` + tUuid.String() + `
+`
+	}
 
 	for _, h := range d.Hosts {
 		i, err := h.GetHostInfo()
