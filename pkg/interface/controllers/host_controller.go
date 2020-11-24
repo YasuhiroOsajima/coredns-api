@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"log"
 	"net/http"
 
@@ -27,6 +28,7 @@ func NewHostController(itr *usecase.HostInteractor) *HostController {
 // @Description Add new host to domain
 // @Accept json
 // @Produce json
+// @Param Tenant header string true "Tenant UUID to set access control"
 // @Param domain_uuid path string true "Target domain's UUID"
 // @Param host body HostRequest true "Request body parameter with json format"
 // @Success 201 {object} DomainInfoResult
@@ -35,6 +37,19 @@ func NewHostController(itr *usecase.HostInteractor) *HostController {
 // @Failure 500 {object} HTTPError
 // @Router /v1/domains/{domain_uuid}/hosts [post]
 func (d *HostController) Add(c Context) {
+	requestTenant := c.GetHeader("Tenant")
+	if requestTenant == "" {
+		NewError(c,
+			http.StatusBadRequest,
+			errors.New("tenant uuid header is not specified"))
+		return
+	}
+
+	requestTenantUuid, err := model.NewUuid(requestTenant)
+	if err != nil {
+		NewError(c, http.StatusBadRequest, err)
+		return
+	}
 	domainUuid := c.Param("domain_uuid")
 	targetDomainUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
@@ -42,9 +57,15 @@ func (d *HostController) Add(c Context) {
 		log.Print(err)
 		return
 	}
-	targetDomain, err := d.interactor.GetDomain(targetDomainUuid)
+	targetDomain, err := d.interactor.GetDomain(targetDomainUuid, requestTenantUuid)
 	if err != nil {
-		NewError(c, http.StatusNotFound, err)
+		switch e := err.(type) {
+		case *model.DomainPermissionError:
+			NewError(c, http.StatusBadRequest, err)
+		default:
+			NewError(c, http.StatusNotFound, err)
+			log.Print(e)
+		}
 		log.Print(err)
 		return
 	}
@@ -76,7 +97,7 @@ func (d *HostController) Add(c Context) {
 		return
 	}
 
-	gotDomain, err := d.interactor.Add(newHost, targetDomainUuid)
+	gotDomain, err := d.interactor.Add(newHost, targetDomainUuid, requestTenantUuid)
 	if err != nil {
 		switch e := err.(type) {
 		case *usecase.HostDuplicatedError:
@@ -94,6 +115,10 @@ func (d *HostController) Add(c Context) {
 	}
 
 	hosts := make([]HostResult, 0)
+	for _, h := range gotDomain.Hosts {
+		hr := HostResult{Name: h.Name, Address: h.Address, Uuid: h.Uuid.String()}
+		hosts = append(hosts, hr)
+	}
 	hostRes := HostResult{Name: newHost.Name, Address: newHost.Address, Uuid: newHost.Uuid.String()}
 	hosts = append(hosts, hostRes)
 
@@ -109,6 +134,7 @@ func (d *HostController) Add(c Context) {
 // @Summary List hosts
 // @Description List hosts from domain
 // @Produce json
+// @Param Tenant header string true "Tenant UUID to set access control"
 // @Param domain_uuid path string true "Target domain's UUID"
 // @Success 200 {object} DomainInfoResult
 // @Failure 400 {object} HTTPError
@@ -116,6 +142,19 @@ func (d *HostController) Add(c Context) {
 // @Failure 500 {object} HTTPError
 // @Router /v1/domains/{domain_uuid}/hosts [get]
 func (d *HostController) List(c Context) {
+	requestTenant := c.GetHeader("Tenant")
+	if requestTenant == "" {
+		NewError(c,
+			http.StatusBadRequest,
+			errors.New("tenant uuid header is not specified"))
+		return
+	}
+
+	requestTenantUuid, err := model.NewUuid(requestTenant)
+	if err != nil {
+		NewError(c, http.StatusBadRequest, err)
+		return
+	}
 	domainUuid := c.Param("domain_uuid")
 	targetDomainUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
@@ -124,10 +163,10 @@ func (d *HostController) List(c Context) {
 		return
 	}
 
-	gotDomain, err := d.interactor.GetDomain(targetDomainUuid)
+	gotDomain, err := d.interactor.GetDomain(targetDomainUuid, requestTenantUuid)
 	if err != nil {
 		switch e := err.(type) {
-		case *model.InvalidParameterGiven:
+		case *model.InvalidParameterGiven, *model.DomainPermissionError:
 			NewError(c, http.StatusBadRequest, err)
 		case *model.DomainNotFoundError:
 			NewError(c, http.StatusNotFound, err)
@@ -160,6 +199,7 @@ func (d *HostController) List(c Context) {
 // @Description Update host info
 // @Accept json
 // @Produce json
+// @Param Tenant header string true "Tenant UUID to set access control"
 // @Param domain_uuid path string true "Target domain's UUID"
 // @Param host body HostRequest true "Request body parameter with json format"
 // @Success 204 {object} DomainInfoResult
@@ -168,6 +208,19 @@ func (d *HostController) List(c Context) {
 // @Failure 500 {object} HTTPError
 // @Router /v1/domains/{domain_uuid}/hosts [patch]
 func (d *HostController) Update(c Context) {
+	requestTenant := c.GetHeader("Tenant")
+	if requestTenant == "" {
+		NewError(c,
+			http.StatusBadRequest,
+			errors.New("tenant uuid header is not specified"))
+		return
+	}
+
+	requestTenantUuid, err := model.NewUuid(requestTenant)
+	if err != nil {
+		NewError(c, http.StatusBadRequest, err)
+		return
+	}
 	domainUuid := c.Param("domain_uuid")
 	targetDomainUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
@@ -175,9 +228,15 @@ func (d *HostController) Update(c Context) {
 		log.Print(err)
 		return
 	}
-	targetDomain, err := d.interactor.GetDomain(targetDomainUuid)
+	targetDomain, err := d.interactor.GetDomain(targetDomainUuid, requestTenantUuid)
 	if err != nil {
-		NewError(c, http.StatusBadRequest, err)
+		switch e := err.(type) {
+		case *model.InvalidParameterGiven, *model.DomainPermissionError:
+			NewError(c, http.StatusBadRequest, err)
+		default:
+			NewError(c, http.StatusBadRequest, err)
+			log.Print(e)
+		}
 		log.Print(err)
 		return
 	}
@@ -190,11 +249,13 @@ func (d *HostController) Update(c Context) {
 		return
 	}
 
-	host, err := d.interactor.Get(targetHostUuid, targetDomainUuid)
+	host, err := d.interactor.Get(targetHostUuid, targetDomainUuid, requestTenantUuid)
 	if err != nil {
 		switch e := err.(type) {
-		case *model.HostNotFoundError, *model.DomainNotFoundError:
+		case *model.HostNotFoundError:
 			NewError(c, http.StatusNotFound, err)
+		case *model.DomainNotFoundError:
+			NewError(c, http.StatusBadRequest, err)
 		default:
 			NewError(c,
 				http.StatusInternalServerError,
@@ -237,12 +298,12 @@ func (d *HostController) Update(c Context) {
 		return
 	}
 
-	err = d.interactor.Update(updatedHost, targetDomainUuid)
+	err = d.interactor.Update(updatedHost, targetDomainUuid, requestTenantUuid)
 	if err != nil {
 		switch e := err.(type) {
 		case *model.HostNotFoundError, *model.DomainNotFoundError:
 			NewError(c, http.StatusNotFound, err)
-		case *usecase.HostDuplicatedError:
+		case *usecase.HostDuplicatedError, *model.DomainPermissionError:
 			NewError(c, http.StatusBadRequest, err)
 		default:
 			NewError(c,
@@ -254,11 +315,13 @@ func (d *HostController) Update(c Context) {
 		return
 	}
 
-	domain, err := d.interactor.GetDomain(targetDomainUuid)
+	domain, err := d.interactor.GetDomain(targetDomainUuid, requestTenantUuid)
 	if err != nil {
 		switch e := err.(type) {
 		case *model.DomainNotFoundError:
 			NewError(c, http.StatusNotFound, err)
+		case *model.DomainPermissionError:
+			NewError(c, http.StatusBadRequest, err)
 		default:
 			NewError(c,
 				http.StatusInternalServerError,
@@ -270,6 +333,10 @@ func (d *HostController) Update(c Context) {
 	}
 
 	hosts := make([]HostResult, 0)
+	for _, h := range domain.Hosts {
+		hr := HostResult{Name: h.Name, Address: h.Address, Uuid: h.Uuid.String()}
+		hosts = append(hosts, hr)
+	}
 	hostRes := HostResult{Name: updatedHost.Name, Address: updatedHost.Address, Uuid: updatedHost.Uuid.String()}
 	hosts = append(hosts, hostRes)
 
@@ -285,6 +352,7 @@ func (d *HostController) Update(c Context) {
 // @Summary Get host
 // @Description Get host info
 // @Produce json
+// @Param Tenant header string true "Tenant UUID to set access control"
 // @Param domain_uuid path string true "Target domain's UUID"
 // @Param host_uuid path string true "Target host's UUID"
 // @Success 200 {object} DomainInfoResult
@@ -292,6 +360,19 @@ func (d *HostController) Update(c Context) {
 // @Failure 404 {object} HTTPError
 // @Router /v1/domains/{domain_uuid}/hosts/{host_uuid} [get]
 func (d *HostController) Get(c Context) {
+	requestTenant := c.GetHeader("Tenant")
+	if requestTenant == "" {
+		NewError(c,
+			http.StatusBadRequest,
+			errors.New("tenant uuid header is not specified"))
+		return
+	}
+
+	requestTenantUuid, err := model.NewUuid(requestTenant)
+	if err != nil {
+		NewError(c, http.StatusBadRequest, err)
+		return
+	}
 	domainUuid := c.Param("domain_uuid")
 	targetDomainUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
@@ -308,11 +389,13 @@ func (d *HostController) Get(c Context) {
 		return
 	}
 
-	host, err := d.interactor.Get(targetHostUuid, targetDomainUuid)
+	host, err := d.interactor.Get(targetHostUuid, targetDomainUuid, requestTenantUuid)
 	if err != nil {
 		switch e := err.(type) {
 		case *model.HostNotFoundError, *model.DomainNotFoundError:
 			NewError(c, http.StatusNotFound, err)
+		case *model.DomainPermissionError:
+			NewError(c, http.StatusBadRequest, err)
 		default:
 			NewError(c,
 				http.StatusInternalServerError,
@@ -323,7 +406,7 @@ func (d *HostController) Get(c Context) {
 		return
 	}
 
-	domain, err := d.interactor.GetDomain(targetDomainUuid)
+	domain, err := d.interactor.GetDomain(targetDomainUuid, requestTenantUuid)
 	if err != nil {
 		switch e := err.(type) {
 		case *model.DomainNotFoundError:
@@ -353,6 +436,7 @@ func (d *HostController) Get(c Context) {
 // @Tags Host
 // @Summary Delete host
 // @Description Delete host info
+// @Param Tenant header string true "Tenant UUID to set access control"
 // @Param domain_uuid path string true "Target domain's UUID"
 // @Param host_uuid path string true "Target host's UUID"
 // @Success 204 {object} DomainInfoResult
@@ -360,6 +444,19 @@ func (d *HostController) Get(c Context) {
 // @Failure 404 {object} HTTPError
 // @Router /v1/domains/{domain_uuid}/hosts/{host_uuid} [delete]
 func (d *HostController) Delete(c Context) {
+	requestTenant := c.GetHeader("Tenant")
+	if requestTenant == "" {
+		NewError(c,
+			http.StatusBadRequest,
+			errors.New("tenant uuid header is not specified"))
+		return
+	}
+
+	requestTenantUuid, err := model.NewUuid(requestTenant)
+	if err != nil {
+		NewError(c, http.StatusBadRequest, err)
+		return
+	}
 	domainUuid := c.Param("domain_uuid")
 	targetDomainUuid, err := model.NewUuid(domainUuid)
 	if err != nil {
@@ -376,11 +473,13 @@ func (d *HostController) Delete(c Context) {
 		return
 	}
 
-	host, err := d.interactor.Get(targetHostUuid, targetDomainUuid)
+	host, err := d.interactor.Get(targetHostUuid, targetDomainUuid, requestTenantUuid)
 	if err != nil {
 		switch e := err.(type) {
 		case *model.HostNotFoundError:
 			NewError(c, http.StatusNotFound, err)
+		case *model.DomainPermissionError:
+			NewError(c, http.StatusBadRequest, err)
 		default:
 			NewError(c,
 				http.StatusInternalServerError,
@@ -391,11 +490,13 @@ func (d *HostController) Delete(c Context) {
 		return
 	}
 
-	err = d.interactor.Delete(host, targetDomainUuid)
+	err = d.interactor.Delete(host, targetDomainUuid, requestTenantUuid)
 	if err != nil {
 		switch e := err.(type) {
 		case *model.HostNotFoundError, *model.DomainNotFoundError:
 			NewError(c, http.StatusNotFound, err)
+		case *model.DomainPermissionError:
+			NewError(c, http.StatusBadRequest, err)
 		default:
 			NewError(c,
 				http.StatusInternalServerError,

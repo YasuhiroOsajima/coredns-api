@@ -12,11 +12,11 @@ func NewHostInteractor(fRepo IFilesystemRepository) *HostInteractor {
 	return &HostInteractor{fRepo}
 }
 
-func (i *HostInteractor) Add(newHost *model.Host, domainUuid model.Uuid) (*model.Domain, error) {
+func (i *HostInteractor) Add(newHost *model.Host, domainUuid model.Uuid, requestTenantUuid model.Uuid) (*model.Domain, error) {
 	i.fsRepository.Lock()
 	defer i.fsRepository.UnLock()
 
-	gotDomain, err := i.fsRepository.GetDomainByUuid(domainUuid)
+	gotDomain, err := i.fsRepository.GetDomainByUuid(domainUuid, requestTenantUuid)
 	if err != nil {
 		return nil, err
 	}
@@ -41,11 +41,11 @@ func (i *HostInteractor) Add(newHost *model.Host, domainUuid model.Uuid) (*model
 	return gotDomain, nil
 }
 
-func (i *HostInteractor) Get(hostUuid, domainUuid model.Uuid) (*model.Host, error) {
+func (i *HostInteractor) Get(hostUuid, domainUuid model.Uuid, requestTenantUuid model.Uuid) (*model.Host, error) {
 	i.fsRepository.Lock()
 	defer i.fsRepository.UnLock()
 
-	domain, err := i.fsRepository.GetDomainByUuid(domainUuid)
+	domain, err := i.fsRepository.GetDomainByUuid(domainUuid, requestTenantUuid)
 	if err != nil {
 		return nil, err
 	}
@@ -59,11 +59,11 @@ func (i *HostInteractor) Get(hostUuid, domainUuid model.Uuid) (*model.Host, erro
 	return nil, model.NewHostNotFoundError()
 }
 
-func (i *HostInteractor) GetDomain(domainUuid model.Uuid) (*model.Domain, error) {
+func (i *HostInteractor) GetDomain(domainUuid model.Uuid, requestTenantUuid model.Uuid) (*model.Domain, error) {
 	i.fsRepository.Lock()
 	defer i.fsRepository.UnLock()
 
-	targetDomain, err := i.fsRepository.GetDomainByUuid(domainUuid)
+	targetDomain, err := i.fsRepository.GetDomainByUuid(domainUuid, requestTenantUuid)
 	if err != nil {
 		return nil, err
 	}
@@ -71,11 +71,11 @@ func (i *HostInteractor) GetDomain(domainUuid model.Uuid) (*model.Domain, error)
 	return targetDomain, nil
 }
 
-func (i *HostInteractor) Update(newHost *model.Host, domainUuid model.Uuid) error {
+func (i *HostInteractor) Update(newHost *model.Host, domainUuid model.Uuid, requestTenantUuid model.Uuid) error {
 	i.fsRepository.Lock()
 	defer i.fsRepository.UnLock()
 
-	domain, err := i.fsRepository.GetDomainByUuid(domainUuid)
+	domain, err := i.fsRepository.GetDomainByUuid(domainUuid, requestTenantUuid)
 	if err != nil {
 		return err
 	}
@@ -106,11 +106,11 @@ func (i *HostInteractor) Update(newHost *model.Host, domainUuid model.Uuid) erro
 	return i.fsRepository.WriteDomainFile(domain)
 }
 
-func (i *HostInteractor) Delete(host *model.Host, domainUuid model.Uuid) error {
+func (i *HostInteractor) Delete(host *model.Host, domainUuid model.Uuid, requestTenantUuid model.Uuid) error {
 	i.fsRepository.Lock()
 	defer i.fsRepository.UnLock()
 
-	domain, err := i.fsRepository.GetDomainByUuid(domainUuid)
+	domain, err := i.fsRepository.GetDomainByUuid(domainUuid, requestTenantUuid)
 	if err != nil {
 		return err
 	}

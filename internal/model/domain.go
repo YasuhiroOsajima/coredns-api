@@ -23,14 +23,28 @@ type Domain struct {
 	ReloadJitter   string
 }
 
-func NewOriginalDomain(name string) (*Domain, error) {
+func NewOriginalDomain(name string, tenantList []string) (*Domain, error) {
 	u, _ := uuid.NewRandom()
 	domainUuid, err := NewUuid(u.String())
 	if err != nil {
 		return nil, err
 	}
 
-	return NewEmptyDomain(domainUuid, name)
+	var tenantUuidList []Uuid
+	for _, t := range tenantList {
+		tenantUuid, err := NewUuid(t)
+		if err != nil {
+			return nil, err
+		}
+		tenantUuidList = append(tenantUuidList, tenantUuid)
+	}
+
+	domain, err := NewEmptyDomain(domainUuid, name)
+	if err != nil {
+		return nil, err
+	}
+	domain.Tenants = tenantUuidList
+	return domain, nil
 }
 
 func NewEmptyDomain(uuid Uuid, name string) (*Domain, error) {
@@ -39,12 +53,14 @@ func NewEmptyDomain(uuid Uuid, name string) (*Domain, error) {
 		return nil, err
 	}
 
-	var hosts []*Host
 	hostsPath := GetHostsFilePath(domainName)
+	var hosts []*Host
+	var tenants []Uuid
 
 	domain := &Domain{
 		Uuid:           uuid,
 		Name:           domainName,
+		Tenants:        tenants,
 		Hosts:          hosts,
 		DomainFilePath: hostsPath,
 		ReloadInterval: "10s",
@@ -154,4 +170,19 @@ func (d *Domain) GetFileInfo() (string, error) {
 	}
 
 	return result, nil
+}
+
+func (d *Domain) UpdateTenants(requestTenantUuid Uuid, tenantUuidList []Uuid) error {
+	accessible := false
+	for _, t := range d.Tenants {
+		if t == requestTenantUuid {
+			accessible = true
+		}
+	}
+	if !accessible {
+		return NewDomainPermissionError()
+	}
+
+	d.Tenants = tenantUuidList
+	return nil
 }

@@ -42,7 +42,8 @@ func TestNewDomain(t *testing.T) {
 
 func TestNewOriginalDomain(t *testing.T) {
 	name := "hogehoge.hoge"
-	domain, err := NewOriginalDomain(name)
+	tenant := []string{"5cdc62c5-a110-4d89-9cdd-5e19f1983f0f"}
+	domain, err := NewOriginalDomain(name, tenant)
 	if err != nil {
 		t.Error(err)
 	}

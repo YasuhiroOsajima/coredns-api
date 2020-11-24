@@ -30,11 +30,11 @@ func (i *DomainInteractor) Add(domain *model.Domain) error {
 	return nil
 }
 
-func (i *DomainInteractor) Get(domainUuid model.Uuid) (*model.Domain, error) {
+func (i *DomainInteractor) Get(domainUuid model.Uuid, requestTenantUuid model.Uuid) (*model.Domain, error) {
 	i.fsRepository.Lock()
 	defer i.fsRepository.UnLock()
 
-	targetDomain, err := i.fsRepository.GetDomainByUuid(domainUuid)
+	targetDomain, err := i.fsRepository.GetDomainByUuid(domainUuid, requestTenantUuid)
 	if err != nil {
 		return nil, err
 	}
@@ -42,11 +42,39 @@ func (i *DomainInteractor) Get(domainUuid model.Uuid) (*model.Domain, error) {
 	return targetDomain, nil
 }
 
-func (i *DomainInteractor) Delete(domainUuid model.Uuid) error {
+func (i *DomainInteractor) Update(domainUuid model.Uuid, requestTenantUuid model.Uuid, tenantUuidList []model.Uuid) (*model.Domain, error) {
 	i.fsRepository.Lock()
 	defer i.fsRepository.UnLock()
 
-	domain, err := i.fsRepository.GetDomainByUuid(domainUuid)
+	domain, err := i.fsRepository.GetDomainByUuid(domainUuid, requestTenantUuid)
+	if err != nil {
+		return nil, err
+	}
+
+	err = domain.UpdateTenants(requestTenantUuid, tenantUuidList)
+	if err != nil {
+		return nil, err
+	}
+
+	err = i.fsRepository.WriteDomainFile(domain)
+	if err != nil {
+		return nil, err
+	}
+
+	err = i.fsRepository.WriteConfCache()
+	if err != nil {
+		_ = i.fsRepository.DeleteDomainFile(domain)
+		return nil, err
+	}
+
+	return domain, nil
+}
+
+func (i *DomainInteractor) Delete(domainUuid model.Uuid, requestTenantUuid model.Uuid) error {
+	i.fsRepository.Lock()
+	defer i.fsRepository.UnLock()
+
+	domain, err := i.fsRepository.GetDomainByUuid(domainUuid, requestTenantUuid)
 	if err != nil {
 		return err
 	}
@@ -65,9 +93,9 @@ func (i *DomainInteractor) Delete(domainUuid model.Uuid) error {
 	return nil
 }
 
-func (i *DomainInteractor) GetDomainsList() ([]*model.Domain, error) {
+func (i *DomainInteractor) GetDomainsList(requestTenantUuid model.Uuid) ([]*model.Domain, error) {
 	i.fsRepository.Lock()
 	defer i.fsRepository.UnLock()
 
-	return i.fsRepository.LoadAllDomains()
+	return i.fsRepository.LoadTenantAllDomains(requestTenantUuid)
 }

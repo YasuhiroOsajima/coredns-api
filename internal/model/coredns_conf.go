@@ -70,10 +70,16 @@ func (d *CoreDNSConf) GetByName(domainName DomainName) (*Domain, error) {
 	return domain, nil
 }
 
-func (d *CoreDNSConf) GetByUuid(domainUuid Uuid) (*Domain, error) {
+func (d *CoreDNSConf) GetByUuid(domainUuid Uuid, requestTenantUuid Uuid) (*Domain, error) {
 	for _, domain := range d.Cache {
 		if domain.Uuid == domainUuid {
-			return domain, nil
+			for _, t := range domain.Tenants {
+				if t == requestTenantUuid {
+					return domain, nil
+				} else {
+					return nil, NewDomainPermissionError()
+				}
+			}
 		}
 	}
 	return nil, NewDomainNotFoundError()
@@ -82,8 +88,21 @@ func (d *CoreDNSConf) GetByUuid(domainUuid Uuid) (*Domain, error) {
 
 func (d *CoreDNSConf) GetAll() []*Domain {
 	var domains []*Domain
-	for _, v := range d.Cache {
-		domains = append(domains, v)
+	for _, domain := range d.Cache {
+		domains = append(domains, domain)
+	}
+	return domains
+}
+
+func (d *CoreDNSConf) GetTenantAll(requestTenantUuid Uuid) []*Domain {
+	var domains []*Domain
+	for _, domain := range d.Cache {
+		for _, tenantUuid := range domain.Tenants {
+			if requestTenantUuid == tenantUuid {
+				domains = append(domains, domain)
+				continue
+			}
+		}
 	}
 	return domains
 }

@@ -8,6 +8,10 @@ definitions:
         items:
           $ref: '#/definitions/controllers.HostResult'
         type: array
+      tenants:
+        items:
+          type: string
+        type: array
       uuid:
         type: string
     type: object
@@ -22,13 +26,28 @@ definitions:
     properties:
       domain:
         type: string
+      tenants:
+        items:
+          type: string
+        type: array
     type: object
   controllers.DomainResult:
     properties:
       domain:
         type: string
+      tenants:
+        items:
+          type: string
+        type: array
       uuid:
         type: string
+    type: object
+  controllers.DomainUpdateRequest:
+    properties:
+      tenants:
+        items:
+          type: string
+        type: array
     type: object
   controllers.HTTPError:
     properties:
@@ -72,6 +91,12 @@ paths:
   /v1/domains:
     get:
       description: List domains from coredns
+      parameters:
+      - description: Tenant UUID to set access control
+        in: header
+        name: Tenant
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -119,6 +144,11 @@ paths:
     delete:
       description: Delete new domain to coredns
       parameters:
+      - description: Tenant UUID to set access control
+        in: header
+        name: Tenant
+        required: true
+        type: string
       - description: Target domain's UUID
         in: path
         name: domain_uuid
@@ -145,6 +175,11 @@ paths:
     get:
       description: Get domain from coredns
       parameters:
+      - description: Tenant UUID to set access control
+        in: header
+        name: Tenant
+        required: true
+        type: string
       - description: Target domain's UUID
         in: path
         name: domain_uuid
@@ -172,10 +207,56 @@ paths:
       summary: Get domain
       tags:
       - Domain
+    patch:
+      description: Update domain info
+      parameters:
+      - description: Tenant UUID to set access control
+        in: header
+        name: Tenant
+        required: true
+        type: string
+      - description: Target domain's UUID
+        in: path
+        name: domain_uuid
+        required: true
+        type: string
+      - description: Request body parameter with json format
+        in: body
+        name: domain
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.DomainUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.DomainInfoResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.HTTPError'
+      summary: Update domain
+      tags:
+      - Domain
   /v1/domains/{domain_uuid}/hosts:
     get:
       description: List hosts from domain
       parameters:
+      - description: Tenant UUID to set access control
+        in: header
+        name: Tenant
+        required: true
+        type: string
       - description: Target domain's UUID
         in: path
         name: domain_uuid
@@ -208,6 +289,11 @@ paths:
       - application/json
       description: Update host info
       parameters:
+      - description: Tenant UUID to set access control
+        in: header
+        name: Tenant
+        required: true
+        type: string
       - description: Target domain's UUID
         in: path
         name: domain_uuid
@@ -246,6 +332,11 @@ paths:
       - application/json
       description: Add new host to domain
       parameters:
+      - description: Tenant UUID to set access control
+        in: header
+        name: Tenant
+        required: true
+        type: string
       - description: Target domain's UUID
         in: path
         name: domain_uuid
@@ -283,6 +374,11 @@ paths:
     delete:
       description: Delete host info
       parameters:
+      - description: Tenant UUID to set access control
+        in: header
+        name: Tenant
+        required: true
+        type: string
       - description: Target domain's UUID
         in: path
         name: domain_uuid
@@ -312,6 +408,11 @@ paths:
     get:
       description: Get host info
       parameters:
+      - description: Tenant UUID to set access control
+        in: header
+        name: Tenant
+        required: true
+        type: string
       - description: Target domain's UUID
         in: path
         name: domain_uuid

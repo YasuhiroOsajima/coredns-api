@@ -70,6 +70,13 @@ func (f *FilesystemRepository) WriteDomainFile(domain *model.Domain) error {
 	return nil
 }
 
+func (f *FilesystemRepository) LoadTenantAllDomains(requestTenantUuid model.Uuid) ([]*model.Domain, error) {
+	if !coreDNSConfCache.IsLocked() {
+		return nil, usecase.NewIsNotLockedError()
+	}
+	return coreDNSConfCache.GetTenantAll(requestTenantUuid), nil
+}
+
 func (f *FilesystemRepository) LoadAllDomains() ([]*model.Domain, error) {
 	if !coreDNSConfCache.IsLocked() {
 		return nil, usecase.NewIsNotLockedError()
@@ -77,12 +84,12 @@ func (f *FilesystemRepository) LoadAllDomains() ([]*model.Domain, error) {
 	return coreDNSConfCache.GetAll(), nil
 }
 
-func (f *FilesystemRepository) GetDomainByUuid(domainUuid model.Uuid) (*model.Domain, error) {
+func (f *FilesystemRepository) GetDomainByUuid(domainUuid model.Uuid, requestTenantUuid model.Uuid) (*model.Domain, error) {
 	if !coreDNSConfCache.IsLocked() {
 		return nil, usecase.NewIsNotLockedError()
 	}
 
-	return coreDNSConfCache.GetByUuid(domainUuid)
+	return coreDNSConfCache.GetByUuid(domainUuid, requestTenantUuid)
 }
 
 func (f *FilesystemRepository) DeleteDomainFile(domain *model.Domain) error {

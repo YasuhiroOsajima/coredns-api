@@ -47,3 +47,15 @@ func NewHostNotFoundError() error {
 func (e *HostNotFoundError) Error() string {
 	return e.err
 }
+
+type DomainPermissionError struct {
+	err string
+}
+
+func NewDomainPermissionError() error {
+	return &DomainPermissionError{err: "specified tenant does not have permission"}
+}
+
+func (e *DomainPermissionError) Error() string {
+	return e.err
+}

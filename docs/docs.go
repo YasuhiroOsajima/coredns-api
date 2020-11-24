@@ -43,6 +43,15 @@ var doc = `{
                     "Domain"
                 ],
                 "summary": "List domains",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tenant UUID to set access control",
+                        "name": "Tenant",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -116,6 +125,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Tenant UUID to set access control",
+                        "name": "Tenant",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "Target domain's UUID",
                         "name": "domain_uuid",
                         "in": "path",
@@ -158,6 +174,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Tenant UUID to set access control",
+                        "name": "Tenant",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "Target domain's UUID",
                         "name": "domain_uuid",
                         "in": "path",
@@ -167,6 +190,67 @@ var doc = `{
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.HTTPError"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update domain info",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Domain"
+                ],
+                "summary": "Update domain",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tenant UUID to set access control",
+                        "name": "Tenant",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Target domain's UUID",
+                        "name": "domain_uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Request body parameter with json format",
+                        "name": "domain",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controllers.DomainUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.DomainInfoResult"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -200,6 +284,13 @@ var doc = `{
                 ],
                 "summary": "List hosts",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tenant UUID to set access control",
+                        "name": "Tenant",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "Target domain's UUID",
@@ -248,6 +339,13 @@ var doc = `{
                 ],
                 "summary": "Add new host",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tenant UUID to set access control",
+                        "name": "Tenant",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "Target domain's UUID",
@@ -307,6 +405,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Tenant UUID to set access control",
+                        "name": "Tenant",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "Target domain's UUID",
                         "name": "domain_uuid",
                         "in": "path",
@@ -363,6 +468,13 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Tenant UUID to set access control",
+                        "name": "Tenant",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "Target domain's UUID",
                         "name": "domain_uuid",
                         "in": "path",
@@ -404,6 +516,13 @@ var doc = `{
                 ],
                 "summary": "Delete host",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tenant UUID to set access control",
+                        "name": "Tenant",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "Target domain's UUID",
@@ -455,6 +574,12 @@ var doc = `{
                         "$ref": "#/definitions/controllers.HostResult"
                     }
                 },
+                "tenants": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "uuid": {
                     "type": "string"
                 }
@@ -476,6 +601,12 @@ var doc = `{
             "properties": {
                 "domain": {
                     "type": "string"
+                },
+                "tenants": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -485,8 +616,25 @@ var doc = `{
                 "domain": {
                     "type": "string"
                 },
+                "tenants": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "uuid": {
                     "type": "string"
+                }
+            }
+        },
+        "controllers.DomainUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "tenants": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },

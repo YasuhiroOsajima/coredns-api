@@ -23,6 +23,7 @@ func Router() {
 	Router.POST("/v1/domains", func(c *gin.Context) { dcntr.Add(c) })
 	Router.GET("/v1/domains", func(c *gin.Context) { dcntr.List(c) })
 	Router.GET("/v1/domains/:domain_uuid", func(c *gin.Context) { dcntr.Get(c) })
+	Router.PATCH("/v1/domains/:domain_uuid", func(c *gin.Context) { dcntr.Update(c) })
 	Router.DELETE("/v1/domains/:domain_uuid", func(c *gin.Context) { dcntr.Delete(c) })
 
 	Router.POST("/v1/domains/:domain_uuid/hosts", func(c *gin.Context) { hcntr.Add(c) })

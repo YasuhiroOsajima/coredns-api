@@ -8,7 +8,8 @@ type IFilesystemRepository interface {
 	UnLock()
 	WriteConfCache() error
 	WriteDomainFile(domain *model.Domain) error
+	LoadTenantAllDomains(requestTenantUuid model.Uuid) ([]*model.Domain, error)
 	LoadAllDomains() ([]*model.Domain, error)
-	GetDomainByUuid(domainUuid model.Uuid) (*model.Domain, error)
+	GetDomainByUuid(domainUuid model.Uuid, requestTenantUuid model.Uuid) (*model.Domain, error)
 	DeleteDomainFile(domain *model.Domain) error
 }
